@@ -1,20 +1,25 @@
 from _thread import *
 import socket
 
-
 HOST = "127.0.0.1"  # The server's hostname or IP address
 PORT = 65432  # The port used by the server
 
 id = -1
+running = 1
+
 
 def sender():
-    while 1:
+    global running
+    while running:
         tmp = input()
+        if tmp.split(" ")[0] == "exit":
+            running = 0
         s.send(bytes(tmp, 'utf-8'))
 
 
 def receiver():
-    while 1:
+    global running
+    while running:
         data = s.recv(1024)
         decoded = data.decode()
         if data is not None:
@@ -27,4 +32,3 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.send(bytes(name, "utf-8"))
     start_new_thread(receiver, ())
     sender()
-

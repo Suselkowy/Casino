@@ -6,6 +6,7 @@ import select
 
 class Game:
     MAX_PLAYERS = 4
+    MIN_PLAYERS = 2
 
     def __init__(self):
         pass
@@ -20,6 +21,7 @@ class GameRoom:
         self.game = game
         self.game_name = name
         self.max_players = game.MAX_PLAYERS
+        self.min_players = game.MIN_PLAYERS
         self.curr_players = 0
         self.active = 1
         self.game_server = game_server
@@ -43,7 +45,15 @@ class GameRoom:
         if(s in self.outputs):
             self.outputs.remove(s)
         del self.players[s]
+
+
+    def untransfer_player(self, s):
+        self.delete_player(s)
         self.game_server.untransfer_client(s)
+
+    def disconnect_player(self,s):
+        self.delete_player(s)
+        self.game_server.disconnect_client(s)
 
     def start(self):
         while self.active:
@@ -55,21 +65,18 @@ class GameRoom:
                     except ConnectionResetError:
                         exceptions.append(s)
                         continue
+
                     if response:
                         decoded_response = response.decode()
                         if decoded_response == "exit":
-                            self.delete_player(s)
+                            self.untransfer_player(s)
                         else:
                             print(f"New response: {decoded_response} from client {self.players[s].name} in GameRoom")
 
                 for s in exceptions:
-                    self.inputs.remove(s)
-                    if s in self.outputs:
-                        self.outputs.remove(s)
-                    del self.players[s]
-                    s.close()
+                    self.delete_player(s)
+                    self.disconnect_player(s)
                     self.curr_players -= 1
-                    print("player disconnected")
 
 
 def search_game_room(game_rooms: [GameRoom], name: str):

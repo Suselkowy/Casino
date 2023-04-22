@@ -7,6 +7,11 @@ from errorDefinitions import *
 import gameRoom
 from _thread import *
 
+
+def start_room(game_room):
+    start_new_thread(lambda x: x.start(), (game_room,))
+
+
 class Server:
     def __init__(self, MAX_USERS_CONNECTED, SERVER_IP, SERVER_PORT):
         self.MAX_USERS_CONNECTED = MAX_USERS_CONNECTED
@@ -34,7 +39,7 @@ class Server:
             tmp.curr_players = num
             self.game_rooms.append(tmp)
         for room in self.game_rooms:
-            start_new_thread(self.start_room, (room,))
+            start_room(room)
 
     def init_socket(self):
         self.s.bind((self.SERVER_IP, self.SERVER_PORT))
@@ -103,14 +108,8 @@ class Server:
                     s.send(next_msg)
 
             for s in exceptions:
-                self.inputs.remove(s)
-                if s in self.outputs:
-                    self.outputs.remove(s)
-                del self.connected_clients[s]
-                del self.message_queues[s]
-                s.close()
+                self.disconnect_client(s)
                 self.num_of_connected_clients -= 1
-                print("player disconnected")
 
     def transfer_client(self, game_room, s):
         self.inputs.remove(s)
@@ -123,27 +122,32 @@ class Server:
         self.inputs.append(s)
         print("untransfered player")
 
+    def disconnect_client(self, s):
+        if s in self.inputs:
+            self.inputs.remove(s)
+        if s in self.outputs:
+            self.outputs.remove(s)
+        if self.connected_clients[s]:
+            del self.connected_clients[s]
+        if self.message_queues[s]:
+            del self.message_queues[s]
+        s.close()
+        print("player disconnected")
+
     def handle_client_response(self, response, s):
-        try:
-            split_response = response.split(":")
-            name = split_response[0]
-            data = split_response[1:]
 
-        except IndexError:
-            raise InvalidResponseException
-
-        if not self.database.get_balance_by_name(name):
-            raise InvalidUserException
-
+        data = response.split(" ")
         try:
             if data[0] == "play":
                 found_rooms = gameRoom.search_game_room(self.game_rooms, data[1])
                 if len(found_rooms) == 0:
-                    new_room = gameRoom.create_game_room(name)
+                    new_room = gameRoom.create_game_room(data[1])
                     self.game_rooms.append(new_room)
                     found_rooms.append(new_room)
+                    start_room(new_room)
                 self.transfer_client(found_rooms[0], s)
-
+            if data[0] == "exit":
+                self.disconnect_client(s)
             else:
                 raise InvalidResponseException
 
@@ -156,8 +160,6 @@ class Server:
 
         return 0
 
-    def start_room(self, game_room):
-        game_room.start()
 
 if __name__ == "__main__":
     server = Server(4, "127.0.0.1", 65432)
