@@ -6,7 +6,7 @@ PORT = 65432  # The port used by the server
 
 id = -1
 running = 1
-
+in_game = 0
 
 def sender():
     global running

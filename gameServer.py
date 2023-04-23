@@ -6,7 +6,7 @@ from databaseClass import Database
 from errorDefinitions import *
 import gameRoom
 from _thread import *
-
+import time
 
 def start_room(game_room):
     start_new_thread(lambda x: x.start(), (game_room,))
@@ -55,8 +55,7 @@ class Server:
 
     def start(self):
         while self.inputs:
-            readable, writable, exceptions = select.select(self.inputs, self.outputs, self.inputs)
-
+            readable, writable, exceptions = select.select(self.inputs, self.outputs, self.inputs, 1)
             for s in readable:
                 if s == self.s:
                     conn, addr = self.s.accept()
@@ -92,7 +91,6 @@ class Server:
                         decoded_response = response.decode()
                         try:
                             self.handle_client_response(decoded_response, s)
-
                             #print(f"New response: {decoded_response} from client {self.connected_clients[s].name}")
                         except InvalidResponseException:
                             print("Invalid response")
@@ -108,8 +106,12 @@ class Server:
                     s.send(next_msg)
 
             for s in exceptions:
+                print("exception in gameServer")
                 self.disconnect_client(s)
                 self.num_of_connected_clients -= 1
+
+            if not (readable or writable or exceptions):
+                continue
 
     def transfer_client(self, game_room, s):
         self.inputs.remove(s)
@@ -120,7 +122,7 @@ class Server:
 
     def untransfer_client(self, s):
         self.inputs.append(s)
-        print("untransfered player")
+        print(f"untransfered player with balance: ${self.connected_clients[s].balance}")
 
     def disconnect_client(self, s):
         if s in self.inputs:
@@ -140,22 +142,25 @@ class Server:
         try:
             if data[0] == "play":
                 found_rooms = gameRoom.search_game_room(self.game_rooms, data[1])
-                if len(found_rooms) == 0:
-                    new_room = gameRoom.create_game_room(data[1])
+                if not found_rooms:
+                    new_room = gameRoom.create_game_room(data[1], self)
                     self.game_rooms.append(new_room)
-                    found_rooms.append(new_room)
+                    found_rooms = [new_room]
                     start_room(new_room)
                 self.transfer_client(found_rooms[0], s)
-            if data[0] == "exit":
+            elif data[0] == "exit":
                 self.disconnect_client(s)
             else:
                 raise InvalidResponseException
 
         except IndexError:
+            print("IndexError")
             raise InvalidResponseException
         except InvalidResponseException:
+            print("InvalidResponseException")
             raise InvalidResponseException
         except InvalidGameName:
+            print("InvalidGameName")
             raise InvalidResponseException
 
         return 0
