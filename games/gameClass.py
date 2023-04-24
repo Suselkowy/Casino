@@ -34,3 +34,6 @@ class Game:
 
     def start(self):
         pass
+
+    def on_low_players_num(self):
+        return GameStatus.NO_CHANGE

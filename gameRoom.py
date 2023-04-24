@@ -1,4 +1,4 @@
-GAMES = ["pac-man", "baccarat"]
+GAMES = ["pac-man", "baccarat", "roulette"]
 import errorDefinitions
 import socket
 from gameServer import Client
@@ -9,6 +9,7 @@ from helpers import send_data
 
 from games.baccarat import Baccarat
 from games.gameClass import Game
+from games.roulette import Roulette
 
 class GameStatus(Enum):
     STOPPED = 0
@@ -58,7 +59,7 @@ class GameRoom:
         self.curr_players -= 1
 
         if self.curr_players < self.min_players:
-            self.game_status = GameStatus.STOPPED
+            self.game_status = self.game.on_low_players_num()
             # TODO give back players they money
 
     def untransfer_player(self, s):
@@ -127,6 +128,8 @@ def create_game_room(name, game_server):
     game = None
     if name == "baccarat":
         game = Baccarat()
+    elif name == "roulette":
+        game = Roulette()
     else:
         game = Game()
     print("new room created")
