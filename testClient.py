@@ -21,9 +21,14 @@ def receiver():
     global running
     while running:
         data = s.recv(1024)
-        decoded = data.decode()
         if data is not None:
-            print(f"{decoded}")
+            decoded = data.decode()
+            if decoded.split(" ")[1] == "string":
+                data = s.recv(1024)
+                decoded = data.decode()
+                print(f"{decoded}")
+            else:
+                print(f"pickle handled")
 
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

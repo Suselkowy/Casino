@@ -5,6 +5,7 @@ from errorDefinitions import InvalidResponseException
 import socket
 from clientClass import Client
 import time
+from games.gameClass import Game, GameStatus
 
 FIGURES = ["J", "Q", "K"]
 
@@ -16,38 +17,6 @@ class Outcome(Enum):
 
     def next(self):
         return Outcome((self.value+1)%3)
-
-class GameStatus(Enum):
-    STOPPED = 0
-    NO_CHANGE = 1
-    UPDATE = 2
-
-class Game:
-    MAX_PLAYERS = 1
-    MIN_PLAYERS = 1
-
-    def __init__(self):
-        self.message_queues: {socket.socket: (any, SendDataType)} = {}
-        self.output = []
-        self.players: {socket.socket: Client} = {}
-        self.status = GameStatus.STOPPED
-
-    def handle_response(self, response, s):
-        if self.status == GameStatus.STOPPED:
-            self.players[s].balance += 100
-            self.message_queues[s].put(
-                (bytes(f"waiting pr players", "utf-8"), SendDataType.STRING))
-            self.output.append(s)
-
-
-    def add_player(self, player):
-        self.players[player.conn] = player
-
-    def del_player(self, player):
-        del self.players[player.conn]
-
-    def start(self):
-        pass
 
 
 def valueToFigure(value):
@@ -89,6 +58,7 @@ class Baccarat(Game):
                     self.displayTable()
                     outcome = self.SecondRound(sums)
                     self.handleWin(outcome)
+                self.clear()
 
 
     def start(self):
@@ -177,7 +147,7 @@ class Baccarat(Game):
     def displayTable(self):
         playerCards = " ".join([str(card) for card in self.table[0]])
         bankerCards = " ".join([str(card) for card in self.table[1]])
-        self.message_queues[self.player].put((bytes(f"""Player:     Banker:\n{playerCards.ljust(11)}{bankerCards}""", "utf-8"), SendDataType.STRING))
+        self.message_queues[self.player].put((bytes(f"""Player:     Banker:\n{playerCards.ljust(11)}{bankerCards}\n""", "utf-8"), SendDataType.STRING))
         self.output.append(self.player)
 
     def betsParser(self, bet):
@@ -207,10 +177,10 @@ class Baccarat(Game):
                     return 1
         except:
             pass
-        finally:
-            self.message_queues[self.player].put((bytes("Invalid bet", "utf-8"), SendDataType.STRING))
-            self.output.append(self.player)
-            return -1
+        self.message_queues[self.player].put((bytes("Invalid bet", "utf-8"), SendDataType.STRING))
+        self.output.append(self.player)
+        return -1
+
 
     def clear(self):
         self.table = [[], []]

@@ -6,9 +6,9 @@ import select
 import queue
 from enum import Enum
 from helpers import send_data
-from helpers import SendDataType
-from baccarat import Baccarat
-from baccarat import Game
+
+from games.baccarat import Baccarat
+from games.gameClass import Game
 
 class GameStatus(Enum):
     STOPPED = 0
@@ -129,4 +129,5 @@ def create_game_room(name, game_server):
         game = Baccarat()
     else:
         game = Game()
+    print("new room created")
     return GameRoom(game, name, game_server)

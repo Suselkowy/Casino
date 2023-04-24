@@ -122,7 +122,7 @@ class Server:
 
     def untransfer_client(self, s):
         self.inputs.append(s)
-        print(f"untransfered player with balance: ${self.connected_clients[s].balance}")
+        print(f"untransfered player")
 
     def disconnect_client(self, s):
         if s in self.inputs:

@@ -10,9 +10,12 @@ class Database:
         self.curr_client_id = 4
 
     def get_balance_by_name(self, client_name):
-        return self.data.get(client_name)[1]
+        client_info = self.data.get(client_name)
+        if not client_info:
+            return client_info
+        return client_info[1]
 
     def create_client(self, client_name):
-        self.data[client_name] = {self.START_BALANCE, self.curr_client_id}
+        self.data[client_name] = [self.START_BALANCE, self.curr_client_id]
         self.curr_client_id += 1
         return self.START_BALANCE
