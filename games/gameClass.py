@@ -4,10 +4,12 @@ from gameServer import Client
 from helpers import SendDataType
 import time
 
+
 class GameStatus(Enum):
     STOPPED = 0
     NO_CHANGE = 1
     UPDATE = 2
+
 
 class Game:
     MAX_PLAYERS = 1
@@ -22,8 +24,6 @@ class Game:
 
     def handle_response(self, response, s):
         if self.status == GameStatus.STOPPED:
-            # TODO: wtm man
-            self.players[s].balance += 100
             self.message_queues[s].put(
                 (bytes(f"waiting pr players", "utf-8"), SendDataType.STRING))
             self.output.append(s)
@@ -36,6 +36,7 @@ class Game:
 
     def del_player(self, player):
         del self.players[player.conn]
+        print("klient usunięty, dostępni:", self.players)
 
     def start(self):
         pass

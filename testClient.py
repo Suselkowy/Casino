@@ -28,7 +28,7 @@ def receiver():
                 decoded = data.decode()
                 print(f"{decoded}")
             else:
-                print(f"pickle handled")
+                print(data.decode())
 
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

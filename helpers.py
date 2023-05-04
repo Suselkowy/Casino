@@ -6,6 +6,7 @@ class SendDataType(Enum):
     PICKLE = 1
 
 def send_data(data, conn ,type):
+    print(type)
     if type == SendDataType.STRING:
         conn.send(b"type string")
         conn.send(data)

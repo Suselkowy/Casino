@@ -158,7 +158,7 @@ class Baccarat(Game):
     -Betting:
         bet [tie|banker|player] <amount>
     -Quit
-        quit""", "utf-8"), SendDataType.STRING))
+        back""", "utf-8"), SendDataType.STRING))
                 self.output.append(self.player)
                 return 0
             elif betSplited[0] == "bet":

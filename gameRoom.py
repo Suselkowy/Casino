@@ -1,6 +1,7 @@
 import time
+import copy
 
-GAMES = ["pac-man", "baccarat", "roulette"]
+GAMES = ["baccarat", "roulette"]
 import errorDefinitions
 import socket
 from gameServer import Client
@@ -56,17 +57,24 @@ class GameRoom:
             self.inputs.remove(s)
         if s in self.outputs:
             self.outputs.remove(s)
+        self.game.del_player(self.players[s])
         del self.players[s]
         self.curr_players -= 1
 
-        #TODO handle client leave
         if self.curr_players < self.min_players:
             self.game.status = self.game.on_low_players_num()
-            # TODO give back players they money
+            if self.game.status == GameStatus.STOPPED:
+                self.game.reset_room()
+                self.reset_room()
 
     def untransfer_player(self, s):
         self.delete_player(s)
         self.game_server.untransfer_client(s)
+
+    def reset_room(self):
+        player_copy = copy.deepcopy(self.inputs)
+        for player_conn in player_copy:
+            self.untransfer_player(player_conn)
 
     def disconnect_player(self, s):
         self.delete_player(s)

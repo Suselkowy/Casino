@@ -6,6 +6,8 @@ from databaseClass import Database
 from errorDefinitions import *
 import gameRoom
 from _thread import *
+from helpers import SendDataType
+from helpers import send_data
 import time
 
 def start_room(game_room):
@@ -29,17 +31,6 @@ class Server:
         self.outputs = []
         self.message_queues = {self.s: queue.Queue()}
         self.game_rooms:[gameRoom.GameRoom] = []
-        self.add_data()
-
-    def add_data(self):
-        taken = [1,2,3,4]
-        names = ["pac-man", "pac-man", "roc-man", "pac-man"]
-        for num, name in zip(taken, names):
-            tmp = gameRoom.GameRoom(gameRoom.Game(), name, self)
-            tmp.curr_players = num
-            self.game_rooms.append(tmp)
-        for room in self.game_rooms:
-            start_room(room)
 
     def init_socket(self):
         self.s.bind((self.SERVER_IP, self.SERVER_PORT))
@@ -101,9 +92,9 @@ class Server:
                 try:
                     next_msg = self.message_queues[s].get_nowait()
                 except queue.Empty:
-                    pass
+                    self.outputs.remove(s)
                 else:
-                    s.send(next_msg)
+                    send_data(next_msg[0], s, next_msg[1])
 
             for s in exceptions:
                 print("exception in gameServer")
@@ -123,6 +114,8 @@ class Server:
     def untransfer_client(self, s):
         self.inputs.append(s)
         print(f"untransfered player")
+        self.message_queues[s].put((b"Disconnected from game, welcome to server lobbby!", SendDataType.STRING))
+        self.outputs.append(s)
 
     def disconnect_client(self, s):
         if s in self.inputs:
@@ -142,7 +135,9 @@ class Server:
         try:
             if data[0] == "play":
                 found_rooms = gameRoom.search_game_room(self.game_rooms, data[1])
+                print("znalezione pokoje:" ,found_rooms)
                 if not found_rooms:
+
                     new_room = gameRoom.create_game_room(data[1], self)
                     self.game_rooms.append(new_room)
                     found_rooms = [new_room]
