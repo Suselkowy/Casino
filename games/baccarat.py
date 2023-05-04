@@ -74,7 +74,7 @@ class Baccarat(Game):
             self.output.append(self.player)
         else:
             self.players[self.player].balance += self.bets[outcome.name]*2
-            self.message_queues[self.player].put((bytes(f"+{self.bets[outcome.name]}","utf-8"), SendDataType.STRING))
+            self.message_queues[self.player].put( (bytes(f"+{self.bets[outcome.name]}","utf-8"), SendDataType.STRING) )
             self.output.append(self.player)
 
     def FirstRound(self,sums):

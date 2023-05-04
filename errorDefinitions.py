@@ -2,7 +2,6 @@ class InvalidResponseException(Exception):
     def __init__(self):
         self.message = "Provided response was not valid"
 
-
 class InvalidUserException(Exception):
     def __init__(self):
         self.message = "Provided user does not exists"

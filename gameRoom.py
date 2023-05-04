@@ -1,3 +1,5 @@
+import time
+
 GAMES = ["pac-man", "baccarat", "roulette"]
 import errorDefinitions
 import socket
@@ -26,7 +28,6 @@ class GameRoom:
         self.curr_players = 0
         self.active = 1
         self.game_server = game_server
-        self.game_status = GameStatus.STOPPED
 
         self.players = {}
         self.message_queues = {}
@@ -58,8 +59,9 @@ class GameRoom:
         del self.players[s]
         self.curr_players -= 1
 
+        #TODO handle client leave
         if self.curr_players < self.min_players:
-            self.game_status = self.game.on_low_players_num()
+            self.game.status = self.game.on_low_players_num()
             # TODO give back players they money
 
     def untransfer_player(self, s):
@@ -99,11 +101,16 @@ class GameRoom:
                 for s in exceptions:
                     self.disconnect_player(s)
 
-                if self.game_status == GameStatus.STOPPED and self.curr_players >= self.min_players:
+                if self.game.status == GameStatus.STOPPED and self.curr_players >= self.min_players:
                     print("Start")
-                    self.game_status = GameStatus.UPDATE
                     self.game.status = GameStatus.UPDATE
                     self.game.start()
+
+                self.game.handle_timer()
+
+                if self.game.status == GameStatus.UPDATE:
+                    self.game.time_of_last_move = time.time()
+                    self.game.status = GameStatus.NO_CHANGE
 
 
 def search_game_room(game_rooms: [GameRoom], name: str):

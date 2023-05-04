@@ -2,6 +2,7 @@ from enum import Enum
 import socket
 from gameServer import Client
 from helpers import SendDataType
+import time
 
 class GameStatus(Enum):
     STOPPED = 0
@@ -17,14 +18,18 @@ class Game:
         self.output = []
         self.players: {socket.socket: Client} = {}
         self.status = GameStatus.STOPPED
+        self.time_of_last_move = time.time()
 
     def handle_response(self, response, s):
         if self.status == GameStatus.STOPPED:
+            # TODO: wtm man
             self.players[s].balance += 100
             self.message_queues[s].put(
                 (bytes(f"waiting pr players", "utf-8"), SendDataType.STRING))
             self.output.append(s)
 
+    def handle_timer(self):
+        pass
 
     def add_player(self, player):
         self.players[player.conn] = player
