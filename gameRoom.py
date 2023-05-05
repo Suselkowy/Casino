@@ -38,6 +38,7 @@ class GameRoom:
         self.game.message_queues = self.message_queues
         self.game.output = self.outputs
         self.game.input = self.inputs
+        self.game.game_room = self
 
     def spots_available(self):
         return self.max_players - self.curr_players

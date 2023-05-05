@@ -21,6 +21,7 @@ class ShooterDpassBet(Exception):
     def __repr__(self):
         return self.message
 
+
 class DiceWinTypes(Enum):
     PASS = 0
     DPASS = 1
@@ -94,8 +95,11 @@ class Dice(Game):
                         self.bets[s] = {"pass": 0, "dpass": 0}
                     if info[0] == "dpass" and self.shooter == 2:
                         raise ShooterDpassBet
-                    # TODO check client balance and update
-                    self.bets[s][info[1]] += int(info[2])
+                    amount = int(info[2])
+                    if self.players[s].balance < amount:
+                        raise InvalidBet
+                    self.bets[s][info[1]] += amount
+                    self.players[s].balance -= amount
                     self.message_queues[s].put((b"Bet placed", SendDataType.STRING))
                     self.output.append(s)
                 except Exception as e:
@@ -121,20 +125,25 @@ class Dice(Game):
                 self.players[client_key].balance += client_score
                 self.output.append(client_key)
                 self.message_queues[client_key].put(
-                    (bytes(f"You won: {client_score}" if client_score > 0 else "You lose", "utf-8"), SendDataType.STRING))
+                    (bytes(f"You won: {client_score}" if client_score > 0 else "You lose", "utf-8"),
+                     SendDataType.STRING))
         self.bets.clear()
         self.next_shooter()
 
-    def next_shooter(self):
-        self.shooterId = (self.shooterId + 1) % len(self.input)
-        self.shooter = self.input[self.shooterId]
+    def next_shooter(self, change):
+        if not change:
+            self.shooter = self.input[self.shooterId]
+        else:
+            self.shooterId = (self.shooterId + 1) % len(self.input)
+            self.shooter = self.input[self.shooterId]
 
     def handle_roll(self, roll):
         if self.state == 1:
             self.change_state(-1)
 
             if roll in (7, 11, 2, 3, 12):
-                self.handle_round_end(DiceWinTypes.PASS if roll in (7, 11) else (DiceWinTypes.DRAW if roll == 12 else DiceWinTypes.DPASS))
+                self.handle_round_end(
+                    DiceWinTypes.PASS if roll in (7, 11) else (DiceWinTypes.DRAW if roll == 12 else DiceWinTypes.DPASS))
                 self.change_state(0)
             else:
                 self.change_state(2)
@@ -152,8 +161,18 @@ class Dice(Game):
             self.change_state(0)
 
     def handle_skip_roll(self, s):
-        #TODO disconnect player s, return all money, switch shooter to next
+        for client_key in self.players.keys():
+            if self.bets.get(client_key) is not None:
+                for key in ("pass", "dpass"):
+                    self.players[client_key].balance += self.bets[s][key]
+                self.output.append(client_key)
+                self.message_queues[client_key].put(
+                    (bytes(f"Shooter left, all bets were refounded, wait for new shooter to be chosen", "utf-8"),
+                     SendDataType.STRING))
+        # TODO i dont know if it is working
         self.change_state(0)
+        self.next_shooter(change=False)
+        self.game_room.untransfer_player(s)
 
     def start(self):
         self.shooter = self.input[0]
@@ -176,7 +195,7 @@ class Dice(Game):
                     self.message_queues[client_key].put((b"Bets ended dice are rolling!", SendDataType.STRING))
                 self.change_state(1)
                 self.status = GameStatus.UPDATE
-        elif self.state in (1,2):
+        elif self.state in (1, 2):
             if time.time() - self.time_of_last_move >= 10:
                 for client_key in self.players.keys():
                     if self.bets.get(client_key) is not None:
