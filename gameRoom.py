@@ -107,6 +107,8 @@ class GameRoom:
                     else:
                         send_data(next_msg[0], s, next_msg[1])
 
+                self.game.handle_timer()
+
                 for s in exceptions:
                     self.disconnect_player(s)
 
@@ -114,8 +116,6 @@ class GameRoom:
                     print("Start")
                     self.game.status = GameStatus.UPDATE
                     self.game.start()
-
-                self.game.handle_timer()
 
                 if self.game.status == GameStatus.UPDATE:
                     self.game.time_of_last_move = time.time()

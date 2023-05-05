@@ -1,5 +1,5 @@
 import random
-
+from enum import Enum
 from games.gameClass import Game, GameStatus
 from helpers import SendDataType
 import time
@@ -20,6 +20,11 @@ class ShooterDpassBet(Exception):
 
     def __repr__(self):
         return self.message
+
+class DiceWinTypes(Enum):
+    PASS = 0
+    DPASS = 1
+    DRAW = 2
 
 
 class Dice(Game):
@@ -89,6 +94,7 @@ class Dice(Game):
                         self.bets[s] = {"pass": 0, "dpass": 0}
                     if info[0] == "dpass" and self.shooter == 2:
                         raise ShooterDpassBet
+                    # TODO check client balance and update
                     self.bets[s][info[1]] += int(info[2])
                     self.message_queues[s].put((b"Bet placed", SendDataType.STRING))
                     self.output.append(s)
@@ -96,20 +102,58 @@ class Dice(Game):
                     self.message_queues[s].put((bytes(str(e), "utf-8"), SendDataType.STRING))
                     self.output.append(s)
 
-    # def calculate_winning(self, p_dict, rolled):
-    #     if rolled % 2 == 1:
-    #         return p_dict['red'] * 2
-    #     if rolled == 0:
-    #         return p_dict['green'] * 14
-    #     return p_dict['black'] * 2
+    def calculate_winning(self, p_dict, rolled):
+        if rolled == DiceWinTypes.DRAW:
+            return p_dict['dpass']
+        elif rolled == DiceWinTypes.PASS:
+            return p_dict['pass'] * 2
+        elif rolled == DiceWinTypes.DPASS:
+            return p_dict['dpass'] * 2
+
+    def change_state(self, state):
+        self.time_of_last_move = time.time()
+        self.state = state
+
+    def handle_round_end(self, winning_bet):
+        for client_key in self.players.keys():
+            if self.bets.get(client_key) is not None:
+                client_score = self.calculate_winning(self.bets[client_key], winning_bet)
+                self.players[client_key].balance += client_score
+                self.output.append(client_key)
+                self.message_queues[client_key].put(
+                    (bytes(f"You won: {client_score}" if client_score > 0 else "You lose", "utf-8"), SendDataType.STRING))
+        self.bets.clear()
+        self.next_shooter()
+
+    def next_shooter(self):
+        self.shooterId = (self.shooterId + 1) % len(self.input)
+        self.shooter = self.input[self.shooterId]
 
     def handle_roll(self, roll):
-        if self.state == 1:  #TODO decide what to do based on roll
-            pass
+        if self.state == 1:
+            self.change_state(-1)
+
+            if roll in (7, 11, 2, 3, 12):
+                self.handle_round_end(DiceWinTypes.PASS if roll in (7, 11) else (DiceWinTypes.DRAW if roll == 12 else DiceWinTypes.DPASS))
+                self.change_state(0)
+            else:
+                self.change_state(2)
+                self.point = roll
+
+
+        elif self.state == 2:
+            self.change_state(-1)
+
+            if roll != 7:
+                if roll == self.point:
+                    self.handle_round_end(DiceWinTypes.PASS)
+            else:
+                self.handle_round_end(DiceWinTypes.DPASS)
+            self.change_state(0)
 
     def handle_skip_roll(self, s):
         #TODO disconnect player s, return all money, switch shooter to next
-        self.state = 0
+        self.change_state(0)
 
     def start(self):
         self.shooter = self.input[0]
@@ -117,15 +161,21 @@ class Dice(Game):
 
     def handle_timer(self):
         if self.state == 0:
+            for client_key in self.players.keys():
+                self.output.append(client_key)
+                self.message_queues[client_key].put((b"Its betting time", SendDataType.STRING))
+                if client_key == self.shooter:
+                    self.message_queues[client_key].put((b"You are a shooter", SendDataType.STRING))
+                    self.output.append(client_key)
+
             if time.time() - self.time_of_last_move >= 10:
                 self.isBetTime = 0
 
                 for client_key in self.players.keys():
                     self.output.append(client_key)
                     self.message_queues[client_key].put((b"Bets ended dice are rolling!", SendDataType.STRING))
-                self.state = 1
+                self.change_state(1)
                 self.status = GameStatus.UPDATE
-                self.time_of_last_move = time.time()
         elif self.state in (1,2):
             if time.time() - self.time_of_last_move >= 10:
                 for client_key in self.players.keys():
@@ -133,5 +183,5 @@ class Dice(Game):
                         self.output.append(client_key)
                         self.message_queues[client_key].put(
                             (bytes(f"Shooter disconnected, returning all bets", "utf-8"), SendDataType.STRING))
-                self.state = -1
-                self.handle_skip_roll()
+                self.change_state(-1)
+                self.handle_skip_roll(self.shooter)

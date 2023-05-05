@@ -38,7 +38,7 @@ class Roulette(Game):
                     info = response.split(" ")
                     if self.bets.get(s) is None:
                         self.bets[s] = {"green": 0, "red": 0, "black": 0}
-
+                    # TODO check client balance and update
                     self.bets[s][info[1]] += int(info[2])
                     self.message_queues[s].put((b"Bet placed", SendDataType.STRING))
                     self.output.append(s)
@@ -79,6 +79,7 @@ class Roulette(Game):
                 for client_key in self.players.keys():
                     if self.bets.get(client_key) is not None:
                         client_score = self.calculate_winning(self.bets[client_key], rolled)
+                        self.players[client_key].balance += client_score
                         self.output.append(client_key)
                         self.message_queues[client_key].put(
                             (bytes(f"You won: {client_score}", "utf-8"), SendDataType.STRING))
