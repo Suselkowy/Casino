@@ -18,6 +18,7 @@ class Game:
     def __init__(self):
         self.message_queues: {socket.socket: (any, SendDataType)} = {}
         self.output = []
+        self.input = []
         self.players: {socket.socket: Client} = {}
         self.status = GameStatus.STOPPED
         self.time_of_last_move = time.time()
