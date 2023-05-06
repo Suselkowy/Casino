@@ -116,7 +116,7 @@ class GameRoom:
                     self.game.status = GameStatus.UPDATE
                     self.game.start()
 
-                if self.game.status != GameStatus.STOPPED:
+                if self.game.status != GameStatus.STOPPED and self.game.status != GameStatus.BUSY:
                     self.game.handle_timer()
 
                 if self.game.status == GameStatus.UPDATE:

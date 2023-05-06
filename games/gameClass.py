@@ -9,6 +9,7 @@ class GameStatus(Enum):
     STOPPED = 0
     NO_CHANGE = 1
     UPDATE = 2
+    BUSY = 3
 
 class Game:
     MAX_PLAYERS = 1
