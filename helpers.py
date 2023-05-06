@@ -7,15 +7,18 @@ class SendDataType(Enum):
 
 def send_data(data, conn ,type):
     if type == SendDataType.STRING:
-        conn.send(b"type string")
+        msg_len = len(data)
+        header_2 = msg_len.to_bytes(4, byteorder='big')
+        conn.send(b"type string " + header_2)
         conn.send(data)
     elif type == SendDataType.PICKLE:
-        conn.send(b"type pickle")
+        conn.send(b"type pickle ")
         conn.sendall(pickle.dump(data))
 
 def receive_data(conn):
-    data = conn.recv(11)
-    decoded = data.decode()
+    data = conn.recv(16)
+    msg_len = int.from_bytes(data[12:16], byteorder="big")
+    decoded = data[:11].decode()
     if decoded[1] == "string":
         return (SendDataType.STRING, conn.recv(1024))
     else:

@@ -112,7 +112,8 @@ class GameRoom:
                     self.disconnect_player(s)
 
                 if self.game.status == GameStatus.STOPPED and self.curr_players >= self.min_players:
-                    print("Start")
+                    print("Start game in room")
+                    self.game.time_of_last_move = time.time()
                     self.game.status = GameStatus.UPDATE
                     self.game.start()
 

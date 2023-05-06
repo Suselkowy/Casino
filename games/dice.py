@@ -128,7 +128,7 @@ class Dice(Game):
         self.change_state(0)
 
     def next_shooter(self):
-        curr_shooter_id = self.input.get(self.shooter)  # check current shooter id
+        curr_shooter_id = self.input.index(self.shooter)  # check current shooter id
         if not curr_shooter_id:  # shooter not in game room
             if self.shooterId < len(self.input):
                 self.shooter = self.input[self.shooterId]
@@ -166,12 +166,11 @@ class Dice(Game):
                     self.change_state(2)
             else:
                 for client_key in self.players.keys():
-                    self.output.append(client_key)
-                    self.message_queues[client_key].put(
-                        (bytes(f"Rolled {roll}", "utf-8"),
-                         SendDataType.STRING))
+                    self.send_message(f"Rolled {roll}", SendDataType.STRING, client_key)
+
                 self.handle_round_end(DiceWinTypes.DPASS)
                 self.change_state(0)
+
         self.status = GameStatus.UPDATE
 
     def handle_skip_roll(self, s):
@@ -179,17 +178,14 @@ class Dice(Game):
             if self.bets.get(client_key) is not None:
                 for key in ("pass", "dpass"):
                     self.players[client_key].balance += self.bets[client_key][key]
-                self.output.append(client_key)
-                self.message_queues[client_key].put(
-                    (bytes(f"Shooter left, all bets were refounded, wait for new shooter to be chosen", "utf-8"),
-                     SendDataType.STRING))
-        # TODO i dont know if it is working
+            self.send_message("Shooter left, all bets were refounded, wait for new shooter to be chosen",
+                              SendDataType.STRING, client_key)
+
         self.change_state(0)
         self.next_shooter()
         self.game_room.untransfer_player(s)
 
     def start(self):
-        print(self.input)
         self.shooter = self.input[0]
         self.shooterId = 0
 
@@ -197,44 +193,40 @@ class Dice(Game):
         if self.state == 0:
             if not self.message_sent:
                 for client_key in self.players.keys():
-                    self.output.append(client_key)
-                    self.message_queues[client_key].put((b"Its betting time", SendDataType.STRING))
+                    self.send_message("Its betting time", SendDataType.STRING, client_key)
                     if client_key == self.shooter:
-                        self.message_queues[client_key].put((b"You are a shooter", SendDataType.STRING))
-                        self.output.append(client_key)
+                        self.send_message("You are a shooter", SendDataType.STRING, client_key)
+
                 self.message_sent = 1
 
             if time.time() - self.time_of_last_move >= 10:
                 self.isBetTime = 0
 
                 for client_key in self.players.keys():
-                    self.output.append(client_key)
-                    self.message_queues[client_key].put((b"Bets ended dice are rolling!", SendDataType.STRING))
+                    self.send_message("Bets ended dice are rolling!", SendDataType.STRING, client_key)
+
                 self.change_state(1)
                 self.status = GameStatus.UPDATE
-                self.isRollTime = 1
 
         elif self.state in (1, 2):
             if time.time() - self.time_of_last_move >= 15:
+
                 for client_key in self.players.keys():
-                    if self.bets.get(client_key) is not None:
-                        self.output.append(client_key)
-                        self.message_queues[client_key].put(
-                            (bytes(f"Shooter disconnected, returning all bets", "utf-8"), SendDataType.STRING))
-                self.change_state(-1)
-                self.handle_skip_roll(self.shooter)
+                    self.send_message(f"Shooter disconnected, returning all bets", SendDataType.STRING, client_key)
+
                 self.isRollTime = 0
+                self.handle_skip_roll(self.shooter)
 
     def reset_room(self):
         for client_key in self.players.keys():
             if self.bets.get(client_key) is not None:
                 for key in ("pass", "dpass"):
                     self.players[client_key].balance += self.bets[client_key][key]
-                self.output.append(client_key)
-                self.message_queues[client_key].put(
-                    (bytes(f"Not enough players, all players will be kicked from server", "utf-8"),
-                     SendDataType.STRING))
+
+                self.send_message(f"Not enough players, all players will be kicked from server", SendDataType.STRING, client_key)
+
         for client_key in self.players.keys():
             self.game_room.untransfer_player(client_key)
+
         self.change_state(0)
         self.status = GameStatus.STOPPED
