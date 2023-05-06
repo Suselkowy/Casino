@@ -3,14 +3,12 @@ import socket
 from gameServer import Client
 from helpers import SendDataType
 import time
-from gameRoom import GameRoom
 
 
 class GameStatus(Enum):
     STOPPED = 0
     NO_CHANGE = 1
     UPDATE = 2
-
 
 class Game:
     MAX_PLAYERS = 1
@@ -20,7 +18,7 @@ class Game:
         self.message_queues: {socket.socket: (any, SendDataType)} = {}
         self.output = []
         self.input = []
-        self.game_room: GameRoom = None
+        self.game_room = None
         self.players: {socket.socket: Client} = {}
         self.status = GameStatus.STOPPED
         self.time_of_last_move = time.time()
@@ -45,4 +43,7 @@ class Game:
         pass
 
     def on_low_players_num(self):
-        return GameStatus.NO_CHANGE
+        return GameStatus.STOPPED
+
+    def reset_room(self):
+        pass

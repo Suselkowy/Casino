@@ -1,7 +1,7 @@
 import time
 import copy
 
-GAMES = ["baccarat", "roulette"]
+GAMES = ["baccarat", "roulette", "dice"]
 import errorDefinitions
 import socket
 from gameServer import Client
@@ -10,14 +10,12 @@ import queue
 from enum import Enum
 from helpers import send_data
 
-from games.baccarat import Baccarat
 from games.gameClass import Game
+from games.dice import Dice
+from games.baccarat import Baccarat
 from games.roulette import Roulette
 
-class GameStatus(Enum):
-    STOPPED = 0
-    NO_CHANGE = 1
-    UPDATE = 2
+from games.gameClass import GameStatus
 
 
 class GameRoom:
@@ -52,6 +50,8 @@ class GameRoom:
         self.message_queues[player.conn] = queue.Queue()
         self.game.add_player(player)
         self.curr_players += 1
+        print(f"curr players: {self.curr_players}")
+        print(f"min players: {self.min_players}")
 
 
     def delete_player(self, s):
@@ -108,8 +108,6 @@ class GameRoom:
                     else:
                         send_data(next_msg[0], s, next_msg[1])
 
-                self.game.handle_timer()
-
                 for s in exceptions:
                     self.disconnect_player(s)
 
@@ -118,9 +116,13 @@ class GameRoom:
                     self.game.status = GameStatus.UPDATE
                     self.game.start()
 
+                if self.game.status != GameStatus.STOPPED:
+                    self.game.handle_timer()
+
                 if self.game.status == GameStatus.UPDATE:
                     self.game.time_of_last_move = time.time()
                     self.game.status = GameStatus.NO_CHANGE
+
 
 
 def search_game_room(game_rooms: [GameRoom], name: str):
@@ -147,6 +149,8 @@ def create_game_room(name, game_server):
         game = Baccarat()
     elif name == "roulette":
         game = Roulette()
+    elif name == "dice":
+        game = Dice()
     else:
         game = Game()
     print("new room created")

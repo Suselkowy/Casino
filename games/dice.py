@@ -41,13 +41,13 @@ class Dice(Game):
         self.isRollTime = 0
         self.state = 0
         self.point = 0
+        self.message_sent = 0
         random.seed(time.time())
 
     def roll(self):
         return random.randint(1, 6) + random.randint(1, 6)
 
     def handle_response(self, response, s):
-        super(Dice, self).handle_response(response, s)
         if self.status != GameStatus.STOPPED:
             if response == "commands":
                 self.message_queues[s].put((bytes("""Available commands:
@@ -73,9 +73,6 @@ class Dice(Game):
                 Shooter (player currently rolling dices can only bet pass)
                 """, "utf-8"), SendDataType.STRING))
                 self.output.append(s)
-            elif not self.isBetTime:
-                self.message_queues[s].put((b"Cant place bets now, wait", SendDataType.STRING))
-                self.output.append(s)
             elif response == "roll":
                 if self.shooter == s and self.isRollTime:
                     self.handle_roll(self.roll())
@@ -88,6 +85,9 @@ class Dice(Game):
                     self.message_queues[s].put(
                         (b"Wait for players to place their bets before rolling!", SendDataType.STRING))
                     self.output.append(s)
+            elif not self.isBetTime:
+                self.message_queues[s].put((b"Cant place bets now, wait", SendDataType.STRING))
+                self.output.append(s)
             else:
                 try:
                     info = response.split(" ")
@@ -119,6 +119,13 @@ class Dice(Game):
         self.state = state
 
     def handle_round_end(self, winning_bet):
+        print("round end")
+        for client_key in self.players.keys():
+            self.output.append(client_key)
+            self.message_queues[client_key].put(
+                (bytes(f"{winning_bet} wins!!", "utf-8"),
+                 SendDataType.STRING))
+
         for client_key in self.players.keys():
             if self.bets.get(client_key) is not None:
                 client_score = self.calculate_winning(self.bets[client_key], winning_bet)
@@ -128,7 +135,8 @@ class Dice(Game):
                     (bytes(f"You won: {client_score}" if client_score > 0 else "You lose", "utf-8"),
                      SendDataType.STRING))
         self.bets.clear()
-        self.next_shooter()
+        self.next_shooter(change=True)
+        self.isBetTime = 1
 
     def next_shooter(self, change):
         if not change:
@@ -142,29 +150,55 @@ class Dice(Game):
             self.change_state(-1)
 
             if roll in (7, 11, 2, 3, 12):
+                for client_key in self.players.keys():
+                    self.output.append(client_key)
+                    self.message_queues[client_key].put(
+                        (bytes(f"Rolled {roll}", "utf-8"),
+                         SendDataType.STRING))
                 self.handle_round_end(
                     DiceWinTypes.PASS if roll in (7, 11) else (DiceWinTypes.DRAW if roll == 12 else DiceWinTypes.DPASS))
                 self.change_state(0)
             else:
+                for client_key in self.players.keys():
+                    self.output.append(client_key)
+                    self.message_queues[client_key].put(
+                        (bytes(f"Rolled {roll}, waiting for next roll! ", "utf-8"),
+                         SendDataType.STRING))
                 self.change_state(2)
                 self.point = roll
-
-
+                self.isRollTime = 1
         elif self.state == 2:
             self.change_state(-1)
-
             if roll != 7:
                 if roll == self.point:
+                    for client_key in self.players.keys():
+                        self.output.append(client_key)
+                        self.message_queues[client_key].put(
+                            (bytes(f"Rolled {roll}", "utf-8"),
+                             SendDataType.STRING))
                     self.handle_round_end(DiceWinTypes.PASS)
+                else:
+                    for client_key in self.players.keys():
+                        self.output.append(client_key)
+                        self.message_queues[client_key].put(
+                            (bytes(f"Rolled {roll}, waiting for next roll! ", "utf-8"),
+                             SendDataType.STRING))
+                self.change_state(2)
             else:
+                for client_key in self.players.keys():
+                    self.output.append(client_key)
+                    self.message_queues[client_key].put(
+                        (bytes(f"Rolled {roll}", "utf-8"),
+                         SendDataType.STRING))
                 self.handle_round_end(DiceWinTypes.DPASS)
-            self.change_state(0)
+                self.change_state(0)
+
 
     def handle_skip_roll(self, s):
         for client_key in self.players.keys():
             if self.bets.get(client_key) is not None:
                 for key in ("pass", "dpass"):
-                    self.players[client_key].balance += self.bets[s][key]
+                    self.players[client_key].balance += self.bets[client_key][key]
                 self.output.append(client_key)
                 self.message_queues[client_key].put(
                     (bytes(f"Shooter left, all bets were refounded, wait for new shooter to be chosen", "utf-8"),
@@ -175,17 +209,20 @@ class Dice(Game):
         self.game_room.untransfer_player(s)
 
     def start(self):
+        print(self.input)
         self.shooter = self.input[0]
         self.shooterId = 0
 
     def handle_timer(self):
         if self.state == 0:
-            for client_key in self.players.keys():
-                self.output.append(client_key)
-                self.message_queues[client_key].put((b"Its betting time", SendDataType.STRING))
-                if client_key == self.shooter:
-                    self.message_queues[client_key].put((b"You are a shooter", SendDataType.STRING))
+            if not self.message_sent:
+                for client_key in self.players.keys():
                     self.output.append(client_key)
+                    self.message_queues[client_key].put((b"Its betting time", SendDataType.STRING))
+                    if client_key == self.shooter:
+                        self.message_queues[client_key].put((b"You are a shooter", SendDataType.STRING))
+                        self.output.append(client_key)
+                self.message_sent = 1
 
             if time.time() - self.time_of_last_move >= 10:
                 self.isBetTime = 0
@@ -195,6 +232,8 @@ class Dice(Game):
                     self.message_queues[client_key].put((b"Bets ended dice are rolling!", SendDataType.STRING))
                 self.change_state(1)
                 self.status = GameStatus.UPDATE
+                self.isRollTime = 1
+
         elif self.state in (1, 2):
             if time.time() - self.time_of_last_move >= 10:
                 for client_key in self.players.keys():
@@ -204,3 +243,17 @@ class Dice(Game):
                             (bytes(f"Shooter disconnected, returning all bets", "utf-8"), SendDataType.STRING))
                 self.change_state(-1)
                 self.handle_skip_roll(self.shooter)
+
+    def reset_room(self):
+        for client_key in self.players.keys():
+            if self.bets.get(client_key) is not None:
+                for key in ("pass", "dpass"):
+                    self.players[client_key].balance += self.bets[client_key][key]
+                self.output.append(client_key)
+                self.message_queues[client_key].put(
+                    (bytes(f"Not enough players, all players will be kicked from server", "utf-8"),
+                     SendDataType.STRING))
+        for client_key in self.players.keys():
+            self.game_room.untransfer_player(client_key)
+        self.change_state(0)
+        self.status = GameStatus.STOPPED
