@@ -13,6 +13,12 @@ class DiceWinTypes(Enum):
     DPASS = 1
     DRAW = 2
 
+    def __repr__(self):
+        return f'{self.name.lower()}'
+
+    def __str__(self):
+        return self.__repr__()
+
 
 def calculate_winning(p_dict, rolled):
     if rolled == DiceWinTypes.DRAW:
@@ -75,6 +81,7 @@ class Dice(Game):
                 self.send_message("Cant place bets now, wait", SendDataType.STRING, s)
             else:  # Potential game command
                 try:
+                    print(response)
                     response_split = response.split(" ")
 
                     if self.bets.get(s) is None:
@@ -83,18 +90,18 @@ class Dice(Game):
                     if response_split[0] == "dpass" and self.shooter == s:
                         raise ShooterDpassBet
 
-                    amount = int(response_split[2])
+                    amount = int(response_split[1])
 
                     if self.players[s].balance < amount:
                         raise InvalidBet
 
-                    self.bets[s][response_split[1]] += amount
+                    self.bets[s][response_split[0]] += amount
                     self.players[s].balance -= amount
 
                     self.send_message("Bet placed", SendDataType.STRING, s)
 
                 except Exception as e:
-                    self.send_message("Error: " + str(e), SendDataType.STRING, s)
+                    self.send_message("Error: " + repr(e), SendDataType.STRING, s)
 
     def change_state(self, state):
         if state == 0:
@@ -203,7 +210,7 @@ class Dice(Game):
                 self.isBetTime = 0
 
                 for client_key in self.players.keys():
-                    self.send_message("Bets ended dice are rolling!", SendDataType.STRING, client_key)
+                    self.send_message("Bets ended, time for shooter to roll!", SendDataType.STRING, client_key)
 
                 self.change_state(1)
                 self.status = GameStatus.UPDATE

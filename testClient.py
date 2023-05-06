@@ -1,5 +1,6 @@
 from _thread import *
 import socket
+from helpers import receive_data, SendDataType
 
 HOST = "127.0.0.1"  # The server's hostname or IP address
 PORT = 65432  # The port used by the server
@@ -20,15 +21,12 @@ def sender():
 def receiver():
     global running
     while running:
-        data = s.recv(1024)
+        data = receive_data(s)
         if data is not None:
-            decoded = data.decode()
-            if decoded.split(" ")[1] == "string":
-                data = s.recv(1024)
-                decoded = data.decode()
-                print(f"{decoded}")
+            if data[0] == SendDataType.STRING:
+                print(f"{data[1].decode()}")
             else:
-                print(data.decode())
+                print(f"{data[1]}")
 
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

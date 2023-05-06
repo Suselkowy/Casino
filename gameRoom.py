@@ -8,7 +8,7 @@ from gameServer import Client
 import select
 import queue
 from enum import Enum
-from helpers import send_data
+from helpers import send_data, SendDataType
 
 from games.gameClass import Game
 from games.dice import Dice
@@ -97,6 +97,10 @@ class GameRoom:
                         decoded_response = response.decode()
                         if decoded_response == "back":
                             self.untransfer_player(s)
+                        elif decoded_response == "balance":
+                            self.outputs.append(s)
+                            self.message_queues[s].put((bytes(f"Your balance: {self.players[s].balance}", "utf-8"),
+                                                        SendDataType.STRING))
                         else:
                             self.game.handle_response(decoded_response, s)
 
