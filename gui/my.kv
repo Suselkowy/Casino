@@ -1,3 +1,5 @@
+#:kivy 2.1.0
+
 <LoginScreen>:
 
     GridLayout:
@@ -6,12 +8,11 @@
         pos_hint: {'x': .3,'y': .35}
 
         TextInput:
-            id: passw
+            id: login_input
             multiline: False
             size_hint: 0.3, 0.1
 
             font_size: 30
-            # top, bottom
             padding_y: [self.height / 2.0 - (self.line_height / 2.0) * len(self._lines), 0]
 
 
@@ -21,11 +22,78 @@
             on_release:
                 root.btn()
 
-
 <SecondScreen>:
 
-    Button:
-        text: "Go Back"
-        on_release:
-            app.root.current = "login"
-            root.manager.transition.direction = "right"
+    GridLayout:
+        cols: 3
+        rows: 3
+
+        Button:
+            text: "Baccarat"
+            on_release:
+                root.change_game("baccarat")
+
+        Button:
+            text: "Roulette"
+            on_release:
+                root.change_game("roulette")
+
+        Button:
+            text: "Dice"
+            on_release:
+                root.change_game("dice")
+
+        Button:
+            text: "Game 4"
+            on_release:
+                root.change_game("game4")
+
+        Button:
+            text: "Game 5"
+            on_release:
+                root.change_game("game5")
+
+        Button:
+            text: "Game 6"
+            on_release:
+                root.change_game("game6")
+
+        Button:
+            text: "Game 7"
+            on_release:
+                root.change_game("game7")
+
+        Button:
+            text: "Game 8"
+            on_release:
+                root.change_game("game8")
+
+        Button:
+            text: "Game 9"
+            on_release:
+                root.change_game("game9")
+
+<GameScreen>:
+
+    GridLayout:
+        cols: 1
+        rows: 3
+
+        TextInput:
+            id: message_input
+            multiline: False
+            size_hint: 0.3, 0.1
+            font_size: 30
+            padding_y: [self.height / 2.0 - (self.line_height / 2.0) * len(self._lines), 0]
+
+        Button:
+            id: send_message
+            text: "Submit"
+            size_hint: 0.3, 0.2
+            on_release:
+                root.btn()
+
+        GridLayout:
+            cols: 1
+            rows: 3
+            id: message_holder
