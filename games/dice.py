@@ -203,6 +203,7 @@ class Dice(Game):
                     self.send_message("Its betting time", SendDataType.STRING, client_key)
                     if client_key == self.shooter:
                         self.send_message("You are a shooter", SendDataType.STRING, client_key)
+                print("mess sent")
 
                 self.message_sent = 1
 

@@ -1,7 +1,7 @@
 import time
 import copy
 
-GAMES = ["baccarat", "roulette", "dice"]
+GAMES = ["baccarat", "roulette", "dice", "game4", "game5", "game6"]
 import errorDefinitions
 import socket
 from gameServer import Client
