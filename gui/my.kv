@@ -1,0 +1,31 @@
+<LoginScreen>:
+
+    GridLayout:
+        cols: 1
+        size_hint: .4, .3
+        pos_hint: {'x': .3,'y': .35}
+
+        TextInput:
+            id: passw
+            multiline: False
+            size_hint: 0.3, 0.1
+
+            font_size: 30
+            # top, bottom
+            padding_y: [self.height / 2.0 - (self.line_height / 2.0) * len(self._lines), 0]
+
+
+        Button:
+            text: "Submit"
+            size_hint: 0.3, 0.2
+            on_release:
+                root.btn()
+
+
+<SecondScreen>:
+
+    Button:
+        text: "Go Back"
+        on_release:
+            app.root.current = "login"
+            root.manager.transition.direction = "right"
