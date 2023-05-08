@@ -74,7 +74,7 @@ class Dice(Game):
                         return
 
                     self.handle_roll(*self.roll())
-                    self.isBetTime = 0
+
                 elif self.shooter != s:
                     self.send_message("You are not a shooter!", SendDataType.STRING, s)
                 else:  # not self.isRollTime
@@ -138,7 +138,7 @@ class Dice(Game):
 
     def next_shooter(self):
         curr_shooter_id = self.input.index(self.shooter)  # check current shooter id
-        if not curr_shooter_id:  # shooter not in game room
+        if curr_shooter_id is None:  # shooter not in game room
             if self.shooterId < len(self.input):
                 self.shooter = self.input[self.shooterId]
             else:
@@ -210,11 +210,10 @@ class Dice(Game):
                     self.send_message("Its betting time", SendDataType.STRING, client_key)
                     if client_key == self.shooter:
                         self.send_message("You are a shooter", SendDataType.STRING, client_key)
-                print("mess sent")
 
                 self.message_sent = 1
 
-            if time.time() - self.time_of_last_move >= 10:
+            if time.time() - self.time_of_last_move >= 15:
                 self.isBetTime = 0
 
                 for client_key in self.players.keys():
