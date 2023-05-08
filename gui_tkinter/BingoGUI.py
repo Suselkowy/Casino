@@ -77,6 +77,12 @@ class BingoGamePage(tk.Frame):
     def back(self):
         self.s.send(bytes("back", 'utf-8'))
         self.controller.show_frame('ChooseGamePage')
+        self.clear()
+
+    def clear(self):
+        self.bet_entry.delete(0, tk.END)
+        self.board_text.delete('1.0', tk.END)
+        self.cmd_text.delete('1.0', tk.END)
 
     def handle_message(self, data):
         if data is not None:

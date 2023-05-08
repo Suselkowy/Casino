@@ -150,3 +150,8 @@ class DiceGamePage(tk.Frame):
     def back(self):
         self.s.send(bytes("back", 'utf-8'))
         self.controller.show_frame('ChooseGamePage')
+        self.clear()
+
+    def clear(self):
+        self.messages_output.delete(0, tk.END)
+        self.bet_entry.delete(0, tk.END)

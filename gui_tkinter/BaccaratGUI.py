@@ -36,3 +36,8 @@ class BaccaratGamePage(tk.Frame):
     def back(self):
         self.s.send(bytes("back", 'utf-8'))
         self.controller.show_frame('ChooseGamePage')
+        self.clear()
+
+    def clear(self):
+        self.message_listbox.delete(0, tk.END)
+        self.message_entry.delete(0, tk.END)

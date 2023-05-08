@@ -78,7 +78,14 @@ class BlackjackGamePage(tk.Frame):
 
     def back(self):
         self.s.send(bytes("back", 'utf-8'))
+        self.clear()
         self.controller.show_frame('ChooseGamePage')
+
+    def clear(self):
+        self.bet_entry.delete(0, tk.END)
+        self.dealer_hand.delete('1.0', tk.END)
+        self.player_hand.delete('1.0', tk.END)
+        self.cmd_text.delete('1.0', tk.END)
 
     # def play(self):
     #     self.s.send(bytes("play blackjack", "utf-8"))
