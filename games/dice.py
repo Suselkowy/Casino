@@ -46,7 +46,9 @@ class Dice(Game):
         random.seed(time.time())
 
     def roll(self):
-        return random.randint(1, 6) + random.randint(1, 6)
+        r1 = random.randint(1, 6)
+        r2 = random.randint(1, 6)
+        return r1 + r2, (r1, r2)
 
     def send_message(self, message, type, s):
         self.message_queues[s].put(
@@ -71,8 +73,8 @@ class Dice(Game):
                         self.send_message("Could not roll, try again", SendDataType.STRING, s)
                         return
 
-                    self.handle_roll(self.roll())
-                    self.isBetTime = 0
+                    self.handle_roll(*self.roll())
+
                 elif self.shooter != s:
                     self.send_message("You are not a shooter!", SendDataType.STRING, s)
                 else:  # not self.isRollTime
@@ -136,7 +138,7 @@ class Dice(Game):
 
     def next_shooter(self):
         curr_shooter_id = self.input.index(self.shooter)  # check current shooter id
-        if not curr_shooter_id:  # shooter not in game room
+        if curr_shooter_id is None:  # shooter not in game room
             if self.shooterId < len(self.input):
                 self.shooter = self.input[self.shooterId]
             else:
@@ -146,17 +148,19 @@ class Dice(Game):
             self.shooterId = (curr_shooter_id + 1) % len(self.input)
             self.shooter = self.input[self.shooterId]
 
-    def handle_roll(self, roll):
+    def handle_roll(self, roll, roll_tuple):
         self.status = GameStatus.BUSY
         if self.state == 1:
             if roll in (7, 11, 2, 3, 12):
                 for client_key in self.players.keys():
-                    self.send_message(f"Rolled {roll}", SendDataType.STRING, client_key)
+                    self.send_message(f"Rolled {roll_tuple} for total of {roll}",
+                                      SendDataType.STRING, client_key)
                 self.handle_round_end(
                     DiceWinTypes.PASS if roll in (7, 11) else (DiceWinTypes.DRAW if roll == 12 else DiceWinTypes.DPASS))
             else:
                 for client_key in self.players.keys():
-                    self.send_message(f"Rolled {roll}, waiting for next roll! ", SendDataType.STRING, client_key)
+                    self.send_message(f"Rolled {roll_tuple} for total of {roll}, waiting for next roll! ",
+                                      SendDataType.STRING, client_key)
                 self.change_state(2)
                 self.point = roll
 
@@ -164,16 +168,19 @@ class Dice(Game):
             if roll != 7:
                 if roll == self.point:
                     for client_key in self.players.keys():
-                        self.send_message(f"Rolled {roll}", SendDataType.STRING, client_key)
+                        self.send_message(f"Rolled {roll_tuple} for total of  {roll}",
+                                          SendDataType.STRING, client_key)
 
                     self.handle_round_end(DiceWinTypes.PASS)
                 else:
                     for client_key in self.players.keys():
-                        self.send_message(f"Rolled {roll}, waiting for next roll! ", SendDataType.STRING, client_key)
+                        self.send_message(f"Rolled {roll_tuple} for total of {roll}, waiting for next roll! ",
+                                          SendDataType.STRING, client_key)
                     self.change_state(2)
             else:
                 for client_key in self.players.keys():
-                    self.send_message(f"Rolled {roll}", SendDataType.STRING, client_key)
+                    self.send_message(f"Rolled {roll_tuple} for total of {roll}",
+                                      SendDataType.STRING, client_key)
 
                 self.handle_round_end(DiceWinTypes.DPASS)
                 self.change_state(0)
@@ -206,7 +213,7 @@ class Dice(Game):
 
                 self.message_sent = 1
 
-            if time.time() - self.time_of_last_move >= 10:
+            if time.time() - self.time_of_last_move >= 15:
                 self.isBetTime = 0
 
                 for client_key in self.players.keys():

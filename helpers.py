@@ -20,8 +20,11 @@ def send_data(data, conn ,type):
         conn.sendall(pickle.dump(data))
 
 def receive_data(conn):
-    #  TODO:  In high network loads code might break
+    #  TODO: fix for big networks
+    # conn.settimeout(5.0)
     data = conn.recv(16)
+    # conn.settimeout(None)
+
     msg_len = int.from_bytes(data[12:16], byteorder="big")
     decoded = data[:11].decode().split(" ")
 
@@ -49,3 +52,5 @@ def receive_data(conn):
     mess = b"".join(chunks)
 
     return data_type, mess
+
+

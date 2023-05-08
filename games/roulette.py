@@ -3,6 +3,7 @@ import random
 from games.gameClass import Game, GameStatus
 from helpers import SendDataType
 import time
+from errorDefinitions import InvalidBet
 from _thread import *
 
 
@@ -38,8 +39,15 @@ class Roulette(Game):
                     info = response.split(" ")
                     if self.bets.get(s) is None:
                         self.bets[s] = {"green": 0, "red": 0, "black": 0}
-                    # TODO check client balance and update
-                    self.bets[s][info[1]] += int(info[2])
+
+                    amount = int(info[2])
+
+                    if self.players[s].balance < amount:
+                        raise InvalidBet
+
+                    self.players[s].balance -= amount
+                    self.bets[s][info[1]] += amount
+
                     self.message_queues[s].put((b"Bet placed", SendDataType.STRING))
                     self.output.append(s)
                 except Exception as e:
@@ -47,10 +55,11 @@ class Roulette(Game):
                     self.output.append(s)
 
     def calculate_winning(self, p_dict, rolled):
-        if rolled % 2 == 1:
+        if rolled % 2 == 0:
             return p_dict['red'] * 2
         if rolled == 0:
             return p_dict['green'] * 14
+
         return p_dict['black'] * 2
 
     def start(self):
@@ -73,7 +82,7 @@ class Roulette(Game):
                 for client_key in self.players.keys():
                     self.output.append(client_key)
                     self.message_queues[client_key].put((bytes(
-                        f"Number rolled:{rolled} - {'red' if rolled % 2 else 'black' if rolled != 0 else 'green'}",
+                        f"Number rolled: {rolled} - {'black' if rolled % 2 == 1 else ('red' if rolled != 0 else 'green')}",
                         "utf-8"), SendDataType.STRING))
 
                 for client_key in self.players.keys():

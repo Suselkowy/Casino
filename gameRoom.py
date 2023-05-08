@@ -1,7 +1,7 @@
 import time
 import copy
 
-GAMES = ["baccarat", "roulette", "dice"]
+GAMES = ["baccarat", "roulette", "dice", "bingo", "blackjack"]
 import errorDefinitions
 import socket
 from gameServer import Client
@@ -14,6 +14,8 @@ from games.gameClass import Game
 from games.dice import Dice
 from games.baccarat import Baccarat
 from games.roulette import Roulette
+from games.blackjack import Blackjack
+from games.bingo import Bingo
 
 from games.gameClass import GameStatus
 
@@ -156,6 +158,10 @@ def create_game_room(name, game_server):
         game = Roulette()
     elif name == "dice":
         game = Dice()
+    elif name == "blackjack":
+        game = Blackjack()
+    elif name == "bingo":
+        game = Bingo()
     else:
         game = Game()
     print("new room created")
