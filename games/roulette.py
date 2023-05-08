@@ -82,7 +82,7 @@ class Roulette(Game):
                 for client_key in self.players.keys():
                     self.output.append(client_key)
                     self.message_queues[client_key].put((bytes(
-                        f"Number rolled:{rolled} - {'red' if rolled % 2 == 0 else ('black' if rolled != 0 else 'green')}",
+                        f"Number rolled: {rolled} - {'black' if rolled % 2 == 1 else ('red' if rolled != 0 else 'green')}",
                         "utf-8"), SendDataType.STRING))
 
                 for client_key in self.players.keys():

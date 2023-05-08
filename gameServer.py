@@ -49,10 +49,10 @@ class Server:
             readable, writable, exceptions = select.select(self.inputs, self.outputs, self.inputs, 1)
             for s in readable:
                 if s == self.s:
-                    conn, addr = self.s.accept()
-                    default_timeout = conn.gettimeout()
-                    conn.settimeout(5)
                     try:
+                        conn, addr = self.s.accept()
+                        default_timeout = conn.gettimeout()
+                        conn.settimeout(5)
                         identification_response = conn.recv(1024)
                         if not identification_response: raise InvalidResponseException
                         decoded_response = identification_response.decode()
@@ -61,17 +61,21 @@ class Server:
                         self.connected_clients[conn] = new_client
                         self.message_queues[conn] = queue.Queue()
                         self.inputs.append(conn)
+
+                        conn.settimeout(default_timeout)
+                        conn.setblocking(0)
+                        self.num_of_connected_clients += 1
+                        print("Player connected")
                     except socket.timeout:
                         conn.close()
                         continue
                     except InvalidResponseException:
                         conn.close()
                         continue
-
-                    conn.settimeout(default_timeout)
-                    conn.setblocking(0)
-                    self.num_of_connected_clients += 1
-                    print("Player connected")
+                    except Exception as e:
+                        print(e)
+                        conn.close()
+                        continue
                 else:
                     try:
                         response = s.recv(1024)
