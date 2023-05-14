@@ -98,6 +98,9 @@ class LoginPage(ttk.Frame):
         self.login_button = tk.Button(self.main_frame, text='Login', command=self.login, font=self.fn)
         self.login_button.pack(pady=30, anchor='center', expand=True, ipadx=20)
 
+        self.bind('<Return>', lambda event: self.login())
+        self.login_input.bind('<Return>', lambda event: self.login())
+
         self.main_frame.place(relx=0.5, rely=0.5, anchor='center')
 
     def login(self):
@@ -129,8 +132,7 @@ class ChooseGamePage(tk.Frame):
         buttons = []
         self.controller = controller
         self.parent = parent
-        # button_w = self.controller.winfo_width() // 3
-        # button_h = self.controller.winfo_height() // 2
+
         self.fn = ('Candara', 13)
 
         curr_row = 0

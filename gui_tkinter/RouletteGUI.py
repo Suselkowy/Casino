@@ -1,5 +1,6 @@
 import socket
 import tkinter as tk
+import ttkbootstrap as ttk
 from tkinter import messagebox, scrolledtext, TOP, NW
 from helpers import receive_data, SendDataType
 import threading
@@ -15,74 +16,46 @@ class RouletteGamePage(tk.Frame):
         self.s = self.controller.s
 
         self.isBetTime = 0
-        self.ft = font.Font(family='Times', size=10)
+        self.ft = ('Candara', 13)
         self.roulette_fonts = {'red':'black', 'black':'red', 'green':'black'}
 
-        bet_entry = tk.Entry(self)
-        bet_entry["borderwidth"] = "1px"
-        bet_entry["font"] = self.ft
-        bet_entry["fg"] = "#333333"
-        bet_entry["justify"] = "center"
-        bet_entry["text"] = "Entry"
-        self.bet_entry = bet_entry
-        self.bet_entry.place(x=170, y=180, width=166, height=30)
+        self.middle_frame = tk.Frame(self)
+        self.middle_frame.place(relx=0.5, rely=0.55, relwidth=0.8, relheight=0.8, anchor='center')
 
-        red_btn = tk.Button(self)
-        red_btn["bg"] = "#f0f0f0"
-        red_btn["font"] = self.ft
-        red_btn["fg"] = "#000000"
-        red_btn["justify"] = "center"
-        red_btn["text"] = "Red"
+        roulette_outcome = tk.Label(self.middle_frame, font=self.ft, fg="#333333", justify='center', text="outcome", width=9, height=4)
+        self.roulette_outcome = roulette_outcome
+        self.roulette_outcome.place(relx=0.5, rely=0.3, anchor='center')
+
+        bet_entry = tk.Entry(self.middle_frame, bg="#375A7F", font=self.ft, fg="#FFFFFF", justify='center', borderwidth="1px", text="Entry")
+        self.bet_entry = bet_entry
+        self.bet_entry.place(relx=0.5, rely=0.55, anchor='center')
+
+        self.buttons_frame = tk.Frame(self.middle_frame)
+        self.buttons_frame.place(relx=0.5, rely=0.79, anchor='center', relwidth=1, relheight=0.2)
+
+        red_btn = tk.Button(self.buttons_frame, bg="#375A7F", font=self.ft, fg="#FFFFFF", justify='center', text="Red", width=10)
         red_btn["command"] = lambda: self.bet_handler("red")
         self.red_btn = red_btn
-        self.red_btn.place(x=120, y=260, width=70, height=25)
+        self.red_btn.place(relx=0, y=0, anchor='nw')
 
-
-        green_btn = tk.Button(self)
-        green_btn["bg"] = "#f0f0f0"
-        green_btn["font"] = self.ft
-        green_btn["fg"] = "#000000"
-        green_btn["justify"] = "center"
-        green_btn["text"] = "Green"
+        green_btn = tk.Button(self.buttons_frame,bg="#375A7F", font=self.ft, fg="#FFFFFF", justify='center', text="Green", width=10)
         green_btn["command"] = lambda: self.bet_handler("green")
         self.green_btn = green_btn
-        self.green_btn.place(x=220, y=260, width=70, height=25)
+        self.green_btn.place(relx=0.5, y=0, anchor='n')
 
-        black_btn = tk.Button(self)
-        black_btn["bg"] = "#f0f0f0"
-        black_btn["font"] = self.ft
-        black_btn["fg"] = "#000000"
-        black_btn["justify"] = "center"
-        black_btn["text"] = "Black"
+        black_btn = tk.Button(self.buttons_frame, bg="#375A7F", font=self.ft, fg="#FFFFFF", justify='center', text="Black", width=10)
         black_btn["command"] = lambda: self.bet_handler("black")
         self.black_btn = black_btn
-        self.black_btn.place(x=320, y=260, width=70, height=25)
+        self.black_btn.place(relx=1, y=0, anchor='ne')
 
-        roulette_outcome = tk.Label(self)
-        roulette_outcome["font"] = self.ft
-        roulette_outcome["fg"] = "#333333"
-        roulette_outcome["justify"] = "center"
-        roulette_outcome["text"] = ""
-        self.roulette_outcome = roulette_outcome
-        self.roulette_outcome.place(x=200, y=60, width=100, height=92)
-
-        back_btn = tk.Button(self)
-        back_btn["bg"] = "#f0f0f0"
-        back_btn["font"] = self.ft
-        back_btn["fg"] = "#000000"
-        back_btn["justify"] = "center"
-        back_btn["text"] = "Back"
-        back_btn["command"] = self.back
+        back_btn = tk.Button(self, bg="#375A7F", font=self.ft, fg="#FFFFFF", justify='center', text="Back",
+                                  command=self.back, width=10)
         self.back_btn = back_btn
-        self.back_btn.place(x=20, y=20, width=70, height=25)
+        self.back_btn.place(x=20, y=20)
 
 
-        self.messages_output = tk.Listbox(self)
-        self.messages_output["borderwidth"] = "1px"
-        self.messages_output["font"] = self.ft
-        self.messages_output["fg"] = "#333333"
-        self.messages_output["justify"] = "center"
-        self.messages_output.place(x=70, y=360, width=361, height=66)
+        self.messages_output = tk.Listbox(self.middle_frame, font=self.ft, fg="#FFFFFF", justify='center', borderwidth="1px")
+        #self.messages_output.place(relx=0.5, rely=0.8, anchor='n')
 
     def bet_handler(self, type):
         if self.bet_entry.get() is not None and self.bet_entry.get().isnumeric():
@@ -100,9 +73,20 @@ class RouletteGamePage(tk.Frame):
             self.roulette_outcome['bg'] = message_split[4]
             font_color = self.roulette_fonts.get(message_split[4], 'black')
             self.roulette_outcome['fg'] = font_color
+        elif "You lost" in message_body:
+            self.display_alert(f"{message_body}\n", "danger")
+        elif "You won" in message_body:
+            self.display_alert(f"{message_body}\n", "success")
+        else:
+            self.display_alert(f"{message_body}\n", "light")
 
-        self.messages_output.insert(tk.END, f"{message_body}\n")
+        #self.messages_output.insert(tk.END, f"{message_body}\n")
 
     def back(self):
         self.s.send(bytes("back", 'utf-8'))
         self.controller.show_frame('ChooseGamePage')
+
+    def display_alert(self, message, color):
+        error = ttk.Label(text=message, bootstyle=color, font=('Candara', 13))
+        error.place(relx=0.5, rely=0.16, anchor='n')
+        error.after(4000, lambda: error.place_forget())

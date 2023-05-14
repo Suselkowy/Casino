@@ -56,8 +56,8 @@ class Baccarat(Game):
                 if outcome.value >= 0:
                     self.handleWin(outcome)
                 else:
-                    self.displayTable()
                     outcome = self.SecondRound(sums)
+                    self.displayTable()
                     self.handleWin(outcome)
                 self.clear()
 
@@ -151,7 +151,7 @@ class Baccarat(Game):
         playerCards = " ".join([str(card) for card in self.table[0]])
         bankerCards = " ".join([str(card) for card in self.table[1]])
         self.message_queues[self.player].put(
-            (bytes(f"""Player:     Banker:\n{playerCards.ljust(11)}{bankerCards}\n""", "utf-8"), SendDataType.STRING))
+            (bytes(f"""Player:     Banker:\n{playerCards.ljust(11)}:{bankerCards}\n""", "utf-8"), SendDataType.STRING))
         self.output.append(self.player)
 
     def betsParser(self, bet):

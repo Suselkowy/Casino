@@ -12,25 +12,35 @@ class BaccaratGamePage(tk.Frame):
         self.controller = controller
         self.s = self.controller.s
 
-        self.back_button = tk.Button(self, text="Back", command=self.back)
+        self.ft = ('Candara', 13)
+
+        self.back_button = tk.Button(self, text="Back", command=self.back, font=self.ft, fg="#FFFFFF", justify='center', width=10)
         self.back_button.pack(side=TOP, anchor=NW, padx=10, pady=10)
 
+        self.side_frame = tk.Frame(self)
+        self.side_frame.pack(side=tk.TOP, padx=10, pady=10)
+
         # Set up the message entry and send button
-        self.message_entry = tk.Entry(self)
-        self.message_entry.pack(side=tk.LEFT, padx=10, pady=10)
-        self.send_button = tk.Button(self, text='Send', command=self.send_message)
-        self.send_button.pack(side=tk.LEFT, padx=10, pady=10)
+        self.message_entry = tk.Entry(self.side_frame, font=self.ft)
+        self.message_entry.pack(padx=10, pady=10, ipadx=10, ipady=6)
+
+        self.button_frame = tk.Frame(self.side_frame)
+        self.button_frame.pack(side=tk.LEFT, padx=10, pady=10)
+        self.player_button = tk.Button(self.button_frame, text='Bet player', command=lambda : self.send_message("player"), font=self.ft, fg="#FFFFFF", justify='center', width=10)
+        self.player_button.pack(side=tk.LEFT, padx=10, pady=10)
+        self.banker_button = tk.Button(self.button_frame, text='Bet banker', command=lambda : self.send_message("banker"), font=self.ft, fg="#FFFFFF", justify='center', width=10)
+        self.banker_button.pack(side=tk.LEFT, padx=10, pady=10)
 
         # Set up the message listbox
         self.message_listbox = scrolledtext.ScrolledText(self, height=20)
-        self.message_listbox.pack(side=tk.LEFT, padx=10, pady=10)
+        self.message_listbox.pack(side=tk.TOP, padx=10, pady=10)
 
     def handle_message(self, data):
         self.message_listbox.insert(tk.END, f"{data[1].decode()}\n")
 
-    def send_message(self):
+    def send_message(self, bet_type):
         message = self.message_entry.get()
-        self.s.send(bytes(message, 'utf-8'))
+        self.s.send(bytes(f"bet {bet_type} {message}", 'utf-8'))
         self.message_entry.delete(0, tk.END)
 
     def back(self):
