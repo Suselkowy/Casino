@@ -39,5 +39,5 @@ class BaccaratGamePage(tk.Frame):
         self.clear()
 
     def clear(self):
-        self.message_listbox.delete(0, tk.END)
+        self.message_listbox.delete('1.0', tk.END)
         self.message_entry.delete(0, tk.END)

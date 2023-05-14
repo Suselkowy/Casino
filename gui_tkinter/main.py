@@ -34,7 +34,7 @@ class SampleApp(ttk.Window):
         self.s = s
         self.curr_frame = None
 
-        self.width, self.height = 500, 500
+        self.width, self.height = 600, 600
         self.geometry(f"{self.width}x{self.height}")
         self.minsize(self.width, self.height)
         self.frames = {}
@@ -84,17 +84,19 @@ class LoginPage(ttk.Frame):
         ttk.Frame.__init__(self, parent, width=width, height=height)
         self.controller = controller
 
+        self.fn = ('Candara', 13)
+
         self.main_frame = ttk.Frame(self)
 
-        self.login_header = ttk.Label(self.main_frame, text="Enter your username")
+        self.login_header = ttk.Label(self.main_frame, text="Enter your username", font=self.fn)
         self.login_header.pack(anchor='center', expand=True)
 
         self.login_input_value = tk.StringVar()
-        self.login_input = ttk.Entry(self.main_frame, textvariable=self.login_input_value)
+        self.login_input = ttk.Entry(self.main_frame, textvariable=self.login_input_value, font=self.fn)
         self.login_input.pack(pady=40, anchor='center', expand=True)
 
-        self.login_button = ttk.Button(self.main_frame, text='Login', command=self.login)
-        self.login_button.pack(pady=30, anchor='center', expand=True)
+        self.login_button = tk.Button(self.main_frame, text='Login', command=self.login, font=self.fn)
+        self.login_button.pack(pady=30, anchor='center', expand=True, ipadx=20)
 
         self.main_frame.place(relx=0.5, rely=0.5, anchor='center')
 
@@ -112,7 +114,7 @@ class LoginPage(ttk.Frame):
             self.show_error_message("Could not connect to server, try again")
 
     def show_error_message(self, message):
-        error = ttk.Label(text=message, bootstyle="danger")
+        error = ttk.Label(text=message, bootstyle="danger", font=self.fn)
         error.place(relx=0.5, rely=0.2, anchor='n')
         error.after(3000, lambda: error.place_forget())
 
@@ -129,6 +131,7 @@ class ChooseGamePage(tk.Frame):
         self.parent = parent
         # button_w = self.controller.winfo_width() // 3
         # button_h = self.controller.winfo_height() // 2
+        self.fn = ('Candara', 13)
 
         curr_row = 0
         curr_col = 0
@@ -143,12 +146,12 @@ class ChooseGamePage(tk.Frame):
         self.main.rowconfigure((0, 1), weight=1, uniform='a')
         self.main.columnconfigure((0, 1, 2), weight=1, uniform='a')
 
-        self.header.grid(row=0, column=0)
-        self.main.grid(row=1, column=0, rowspan=2)
+        self.header.grid(row=0, column=0, sticky='nsew')
+        self.main.grid(row=1, column=0, rowspan=2, sticky='nsew')
 
         for game in GAMES:
-            buttons.append(tk.Button(self.main, text=f"{game}"))
-            buttons[i].grid(row=curr_row, column=curr_col, sticky='nsew')
+            buttons.append(tk.Button(self.main, text=f"{game}", font=self.fn))
+            buttons[i].grid(row=curr_row, column=curr_col, sticky='nsew', padx=10, pady=10)
             buttons[i].bind(f"<Button-1>", self.callback)
 
             i += 1
