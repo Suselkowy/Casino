@@ -54,10 +54,11 @@ class Baccarat(Game):
                 outcome = self.FirstRound(sums)
 
                 if outcome.value >= 0:
+                    self.displayTable()
                     self.handleWin(outcome)
                 else:
-                    self.displayTable()
                     outcome = self.SecondRound(sums)
+                    self.displayTable()
                     self.handleWin(outcome)
                 self.clear()
 
@@ -71,12 +72,12 @@ class Baccarat(Game):
     def handleWin(self, outcome: Outcome):
         if self.bets[outcome.name] == 0:
             self.message_queues[self.player].put((bytes(
-                f"-{self.bets[outcome.next().name] + self.bets[outcome.next().next().name]}", "utf-8"),
+                f"Outcome:-{self.bets[outcome.next().name] + self.bets[outcome.next().next().name]}", "utf-8"),
                                                   SendDataType.STRING))
             self.output.append(self.player)
         else:
             self.players[self.player].balance += self.bets[outcome.name] * 2
-            self.message_queues[self.player].put((bytes(f"+{self.bets[outcome.name]}", "utf-8"), SendDataType.STRING))
+            self.message_queues[self.player].put((bytes(f"Outcome:+{self.bets[outcome.name]}", "utf-8"), SendDataType.STRING))
             self.output.append(self.player)
 
     def FirstRound(self, sums):
@@ -90,8 +91,6 @@ class Baccarat(Game):
 
         sums[0] = playerSum
         sums[1] = bankerSum
-
-        self.displayTable()
 
         if playerSum == bankerSum and playerSum not in (8, 9):
             self.message_queues[self.player].put((b"Its a Tie!", SendDataType.STRING))
@@ -151,7 +150,7 @@ class Baccarat(Game):
         playerCards = " ".join([str(card) for card in self.table[0]])
         bankerCards = " ".join([str(card) for card in self.table[1]])
         self.message_queues[self.player].put(
-            (bytes(f"""Player:     Banker:\n{playerCards.ljust(11)}{bankerCards}\n""", "utf-8"), SendDataType.STRING))
+            (bytes(f"""Player:     Banker:\n{playerCards}:{bankerCards}\n""", "utf-8"), SendDataType.STRING))
         self.output.append(self.player)
 
     def betsParser(self, bet):

@@ -89,9 +89,15 @@ class Roulette(Game):
                     if self.bets.get(client_key) is not None:
                         client_score = self.calculate_winning(self.bets[client_key], rolled)
                         self.players[client_key].balance += client_score
+
+                        message = f"You won: {client_score}"
+
+                        if client_score == 0:
+                            message = "You lost"
+
                         self.output.append(client_key)
                         self.message_queues[client_key].put(
-                            (bytes(f"You won: {client_score}", "utf-8"), SendDataType.STRING))
+                            (bytes(message, "utf-8"), SendDataType.STRING))
 
                 self.bets.clear()
                 self.state = 2

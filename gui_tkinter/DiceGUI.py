@@ -1,11 +1,13 @@
 import socket
 import tkinter as tk
+import ttkbootstrap as ttk
 from tkinter import messagebox, scrolledtext, TOP, NW
 from helpers import receive_data, SendDataType
 import threading
 from gameRoom import GAMES
 import tkinter.font as font
 from PIL import Image, ImageTk
+
 
 class DiceGamePage(tk.Frame):
 
@@ -20,89 +22,77 @@ class DiceGamePage(tk.Frame):
 
         self.dice_imgs = self.init_dice_imgs()
 
-        self.ft = font.Font(family='Times', size=10)
+        self.ft = ('Candara', 13)
 
-        self.back_btn = tk.Button(self)
-        self.back_btn["bg"] = "#f0f0f0"
-        self.back_btn["font"] = self.ft
-        self.back_btn["fg"] = "#000000"
-        self.back_btn["justify"] = "center"
-        self.back_btn["text"] = "Back"
-        self.back_btn.place(x=10, y=10, width=70, height=25)
-        self.back_btn["command"] = self.back
+        self.back_btn = tk.Button(self, bg="#375A7F", font=self.ft, fg="#FFFFFF", justify='center', text="Back",
+                                  command=self.back)
+        self.back_btn.place(x=10, y=10, width=70)
 
-        self.dice_1 = tk.Label(self, image=self.dice_imgs[0])
-        self.dice_1["font"] = self.ft
-        self.dice_1["fg"] = "#333333"
-        self.dice_1["justify"] = "center"
-        self.dice_1["text"] = "Dice1"
-        self.dice_1.place(x=255, y=40, width=130, height=150)
+        self.roll_frame = tk.Frame(self)
+        self.roll_frame.place(relx=0, rely=0, relwidth=0.5, relheight=1, anchor='nw')
 
-        self.dice_2 = tk.Label(self, image=self.dice_imgs[0])
-        self.dice_2["font"] = self.ft
-        self.dice_2["fg"] = "#333333"
-        self.dice_2["justify"] = "center"
-        self.dice_2["text"] = "Dice2"
-        self.dice_2.place(x=365, y=40, width=130, height=150)
+        self.fake_label_top_roll = tk.Label(self.roll_frame)
+        self.fake_label_top_roll.pack(expand=True)
 
-        self.roll_btn = tk.Button(self)
-        self.roll_btn["bg"] = "#f0f0f0"
-        self.roll_btn["font"] = self.ft
-        self.roll_btn["fg"] = "#000000"
-        self.roll_btn["justify"] = "center"
-        self.roll_btn["text"] = "Roll"
-        self.roll_btn.place(x=340, y=190, width=70, height=25)
-        self.roll_btn["command"] = self.roll
+        self.dice_frame = tk.Frame(self.roll_frame)
 
-        self.bet_entry = tk.Entry(self)
-        self.bet_entry["borderwidth"] = "1px"
-        self.bet_entry["font"] = self.ft
-        self.bet_entry["fg"] = "#333333"
-        self.bet_entry["justify"] = "center"
-        self.bet_entry["text"] = "Entry"
-        self.bet_entry.place(x=40, y=130, width=171, height=30)
+        self.dice_1 = tk.Label(self.dice_frame, image=self.dice_imgs[0], fg="#FFFFFF", justify='center')
+        self.dice_1.pack(side='left', padx=10)
 
-        self.bet_label = tk.Label(self)
-        self.bet_label["font"] = self.ft
-        self.bet_label["fg"] = "#333333"
-        self.bet_label["justify"] = "center"
-        self.bet_label["text"] = "Enter bet amount"
-        self.bet_label.place(x=70, y=80, width=108, height=30)
+        self.dice_2 = tk.Label(self.dice_frame, image=self.dice_imgs[0], fg="#FFFFFF", justify='center')
+        self.dice_2.pack(side='left', padx=10)
 
-        self.pass_btn = tk.Button(self)
-        self.pass_btn["bg"] = "#f0f0f0"
-        self.pass_btn["font"] = self.ft
-        self.pass_btn["fg"] = "#000000"
-        self.pass_btn["justify"] = "center"
-        self.pass_btn["text"] = "pas"
-        self.pass_btn.place(x=40, y=190, width=70, height=25)
-        self.pass_btn["command"] = self.pass_handler
+        self.dice_frame.pack(pady=20)
 
-        self.dpass_btn = tk.Button(self)
-        self.dpass_btn["bg"] = "#f0f0f0"
-        self.dpass_btn["font"] = self.ft
-        self.dpass_btn["fg"] = "#000000"
-        self.dpass_btn["justify"] = "center"
-        self.dpass_btn["text"] = "dpass"
-        self.dpass_btn.place(x=140, y=190, width=70, height=25)
-        self.dpass_btn["command"] = self.dpass_handler
+        self.roll_btn = tk.Button(self.roll_frame, bg="#375A7F", font=self.ft, fg="#FFFFFF", justify='center', text="Roll",
+                                  command=self.roll, width=10)
+        self.roll_btn.pack(pady=10)
 
-        self.messages_label = tk.Label(self)
-        self.messages_label["font"] = self.ft
-        self.messages_label["fg"] = "#333333"
-        self.messages_label["justify"] = "center"
-        self.messages_label["text"] = "Messages"
-        self.messages_label.place(x=110, y=290, width=278, height=52)
+        self.fake_label_bottom_roll = tk.Label(self.roll_frame)
+        self.fake_label_bottom_roll.pack(expand=True)
 
-        self.messages_output = tk.Listbox(self)
-        self.messages_output["borderwidth"] = "1px"
-        self.messages_output["font"] = self.ft
-        self.messages_output["fg"] = "#333333"
-        self.messages_output["justify"] = "center"
-        self.messages_output.place(x=70, y=360, width=361, height=66)
+        self.bet_frame = tk.Frame(self)
+        self.bet_frame.place(relx=0.5, y=7, relwidth=0.5, relheight=1, anchor='nw')
+
+        self.fake_label_top = tk.Label(self.bet_frame)
+        self.fake_label_top.pack(expand=True)
+
+        self.bet_label = tk.Label(self.bet_frame, font=self.ft, fg="#FFFFFF", justify='center', text="Enter bet amount")
+        self.bet_label.pack(pady=20)
+
+        self.bet_entry = ttk.Entry(self.bet_frame, font=self.ft, text="Entry")
+        self.bet_entry.pack(pady=20)
+
+        self.btn_frame = tk.Frame(self.bet_frame)
+        self.btn_frame.pack(pady=30)
+
+        self.pass_btn = tk.Button(self.btn_frame, background="#375A7F", font=self.ft, fg="#FFFFFF", justify='center', text=" pass"
+                                  , command=self.pass_handler, width=10)
+        self.pass_btn.pack(side='left', expand=True, padx=20)
+
+        self.dpass_btn = tk.Button(self.btn_frame, background="#375A7F", font=self.ft, fg="#FFFFFF", justify='center',
+                                   text="dpass"
+                                   , command=self.dpass_handler, width=10)
+        self.dpass_btn.pack(side='left', expand=True, padx=20)
+
+        self.fake_label_bottom = tk.Label(self.bet_frame)
+        self.fake_label_bottom.pack(expand=True)
+
+        self.messages_output = tk.Listbox(self, borderwidth='1px', font=self.ft,  fg="#FFFFFF", justify='center',
+                                          height=5, bg="#000000")
+        self.messages_output.R = 255
+        self.messages_output.G = 255
+        self.messages_output.B = 255
+        self.messages_output.place(relx=0.5, y=10, relwidth=0.7, anchor='n')
+
+        self.back_btn.tkraise()
+
+    def show_message(self, message):
+        self.messages_output.insert(tk.END, f"{message}\n")
+        self.messages_output.yview(tk.END)
 
     def init_dice_imgs(self):
-        return [ImageTk.PhotoImage(Image.open(f"assets/dice-{i}.png").resize((80, 80))) for i in range(1, 7)]
+        return [ImageTk.PhotoImage(Image.open(f"assets/dice-{i}.png").resize((110, 110))) for i in range(1, 7)]
 
     def dpass_handler(self):
         if self.bet_entry.get() is not None and self.bet_entry.get().isnumeric() and self.isBetTime:
@@ -117,7 +107,7 @@ class DiceGamePage(tk.Frame):
     def roll(self):
         if self.isRollTime:
             self.isRollTime = 0
-            self.roll_btn['bg'] = "#f0f0f0"
+            self.roll_btn['bg'] = "#375A7F"
             self.s.send(bytes("roll", 'utf-8'))
 
     def handle_message(self, data):
@@ -133,6 +123,7 @@ class DiceGamePage(tk.Frame):
         elif message_split[0] == "Disconnected":
             self.controller.show_frame('ChooseGamePage')
         elif message_body == "Bets ended, time for shooter to roll!":
+            # self.show_message("Bets ended, time for shooter to roll!")
             self.isRollTime = 1
             self.roll_btn['bg'] = 'green'
         elif message_split[0] == "Rolled":
@@ -141,11 +132,13 @@ class DiceGamePage(tk.Frame):
             self.dice_1['image'] = self.dice_imgs[int(str_tuple_1[1]) - 1]
             self.dice_2['image'] = self.dice_imgs[int(str_tuple_2[0]) - 1]
 
+
         if "waiting for next roll!" in message_body:
             self.isRollTime = 1
             self.roll_btn['bg'] = 'green'
+        if "Rolled" not in message_body:
+            self.show_message(message_body)
 
-        self.messages_output.insert(tk.END, f"{message_body}\n")
 
     def back(self):
         self.s.send(bytes("back", 'utf-8'))
@@ -153,5 +146,6 @@ class DiceGamePage(tk.Frame):
         self.clear()
 
     def clear(self):
-        self.messages_output.delete(0, tk.END)
+        self.messages_output.delete('1.0', tk.END)
         self.bet_entry.delete(0, tk.END)
+        self.roll_btn['bg'] = "#375A7F"
