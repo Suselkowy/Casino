@@ -3,66 +3,13 @@ from enum import Enum
 from games.gameClass import Game, GameStatus
 from helpers import SendDataType
 import time
-
-
-class Deck:
-    def __init__(self):
-        self.cards = []
-        self.fillDeck()
-        random.seed(time.time())
-
-    def fillDeck(self):
-        self.cards = []
-        for deck in range(6):
-            for suit in ["♠", "♥", "♦", "♣"]:
-                for value in range(1, 14):
-                    self.cards.append(Card(suit, value))
-        self.shuffle()
-
-    def shuffle(self):
-        random.shuffle(self.cards)
-
-    def draw(self):
-        if len(self.cards) <= 7:
-            self.fillDeck()
-
-        return self.cards.pop()
-
-
-FIGURES = ["J", "Q", "K"]
-
-
-def valueToFigure(value):
-    if value == 1:
-        return "A"
-    elif value <= 10:
-        return str(value)
-    else:
-        return FIGURES[value - 11]
-
-
-class Card:
-    def __init__(self, suit, val):
-        self._suit = suit
-        self._value = val
-
-    def __str__(self):
-        return f"{valueToFigure(self._value)}{self._suit}"
-
-    def __repr__(self):
-        return f"{valueToFigure(self._value)}{self._suit}"
-
-    @property
-    def value(self):
-        return self._value if self._value <= 10 else 10
-
+from games.cardClass import Deck, CardBlackjack
 
 class GameState(Enum):
     BETTING = 0
     PLAYER_TURN = 1
     DEALER_TURN = 2
     GAME_OVER = 3
-
 
 def calculate_hand_value(hand):
     value = 0
@@ -87,7 +34,7 @@ class Blackjack(Game):
     def __init__(self):
         super().__init__()
         self.bets = {}
-        self.deck = Deck()
+        self.deck = Deck(CardBlackjack, 6)
         self.player_key = None
         self.state = GameState.BETTING
         self.pot = 0

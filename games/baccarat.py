@@ -6,8 +6,7 @@ import socket
 from clientClass import Client
 import time
 from games.gameClass import Game, GameStatus
-
-FIGURES = ["J", "Q", "K"]
+from games.cardClass import Deck, CardBaccarat
 
 
 class Outcome(Enum):
@@ -20,14 +19,6 @@ class Outcome(Enum):
         return Outcome((self.value + 1) % 3)
 
 
-def valueToFigure(value):
-    if value == 1:
-        return "A"
-    elif value <= 10:
-        return str(value)
-    else:
-        return FIGURES[value - 11]
-
 
 class Baccarat(Game):
     MAX_PLAYERS = 1
@@ -36,7 +27,7 @@ class Baccarat(Game):
     def __init__(self):
         super().__init__()
         self.bets = {"tie": 0, "player": 0, "banker": 0}
-        self.cards = Deck()
+        self.cards = Deck(CardBaccarat, 6)
         self.table = [[], []]
         self.player = None
 
@@ -189,39 +180,3 @@ class Baccarat(Game):
         for key in self.bets:
             self.bets[key] = 0
 
-
-class Deck:
-    def __init__(self):
-        self.cards = []
-        self.fillDeck()
-        random.seed(time.time())
-
-    def fillDeck(self):
-        self.cards = []
-        for deck in range(6):
-            for suit in ["♠", "♥", "♦", "♣"]:
-                for value in range(1, 14):
-                    self.cards.append(Card(suit, value))
-        self.shuffle()
-
-    def shuffle(self):
-        random.shuffle(self.cards)
-
-    def draw(self):
-        if len(self.cards) <= 7:
-            self.fillDeck()
-
-        return self.cards.pop()
-
-
-class Card:
-    def __init__(self, suit, val):
-        self._suit = suit
-        self._value = val
-
-    def __str__(self):
-        return f"{valueToFigure(self._value)}{self._suit}"
-
-    @property
-    def value(self):
-        return self._value if self._value <= 10 else 0
