@@ -30,6 +30,7 @@ class GameRoom:
         self.active = 1
         self.game_server = game_server
 
+        self.database_calls = []
         self.players = {}
         self.message_queues = {}
         self.inputs = []
@@ -55,6 +56,11 @@ class GameRoom:
         print(f"curr players: {self.curr_players}")
         print(f"min players: {self.min_players}")
 
+    def change_balance(self, user_name, balance):
+        self.game_server.change_balance(user_name, balance)
+
+    def add_game_history(self, client_name, game_name, win, earnings, loss):
+        self.game_server.add_game_history( client_name, game_name, win, earnings, loss)
 
     def delete_player(self, s):
         if s in self.inputs:

@@ -18,8 +18,6 @@ class Outcome(Enum):
     def next(self):
         return Outcome((self.value + 1) % 3)
 
-
-
 class Baccarat(Game):
     MAX_PLAYERS = 1
     MIN_PLAYERS = 1
@@ -66,10 +64,13 @@ class Baccarat(Game):
                 f"Outcome:-{self.bets[outcome.next().name] + self.bets[outcome.next().next().name]}", "utf-8"),
                                                   SendDataType.STRING))
             self.output.append(self.player)
+            self.add_game_history(self.player, "baccarat", 0, 0, self.bets[outcome.next().name] + self.bets[outcome.next().next().name])
         else:
             self.players[self.player].balance += self.bets[outcome.name] * 2
+            self.update_balance(self.player, self.bets[outcome.name] * 2)
             self.message_queues[self.player].put((bytes(f"Outcome:+{self.bets[outcome.name]}", "utf-8"), SendDataType.STRING))
             self.output.append(self.player)
+            self.add_game_history(self.player, "baccarat", 1, self.bets[outcome.name], 0)
 
     def FirstRound(self, sums):
         self.table[0].append(self.cards.draw())
@@ -158,6 +159,7 @@ class Baccarat(Game):
             elif betSplited[0] == "bet":
                 if self.bets.get(betSplited[1]) is not None:
                     amount = int(betSplited[2])
+
                     if amount < 0:
                         self.message_queues[self.player].put((bytes("Invalid bet", "utf-8"), SendDataType.STRING))
                         self.output.append(self.player)
@@ -168,6 +170,7 @@ class Baccarat(Game):
                         return -1
                     self.bets[betSplited[1]] = amount
                     self.players[self.player].balance -= amount
+                    self.update_balance(self.player, -amount)
                     return 1
         except:
             pass
