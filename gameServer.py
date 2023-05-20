@@ -27,6 +27,8 @@ class Server:
 
         self.connected_clients = {}
 
+        self.database_calls = []
+
         self.inputs = [self.s]
         self.outputs = []
         self.message_queues = {self.s: queue.Queue()}
@@ -105,6 +107,8 @@ class Server:
                 self.disconnect_client(s)
                 self.num_of_connected_clients -= 1
 
+            self.update_database()
+
             if not (readable or writable or exceptions):
                 continue
 
@@ -120,6 +124,21 @@ class Server:
         print(f"untransfered player")
         self.message_queues[s].put((b"Disconnected from game, welcome to server lobbby!", SendDataType.STRING))
         self.outputs.append(s)
+
+    def change_balance(self, client_name, balance):
+        self.database_calls.append((self.database.change_balance, [client_name, balance]))
+
+    def add_game_history(self, client_name, game_name, win, earnings, loss):
+        self.database_calls.append((self.database.insert_game_history, [client_name, game_name, win, earnings, loss]))
+
+    def update_database(self):
+        tmp = self.database_calls.copy()
+        self.database_calls = []
+
+        for call in tmp:
+            test_var = call[0](*call[1])
+            print(test_var)
+
 
     def disconnect_client(self, s):
         if s in self.inputs:

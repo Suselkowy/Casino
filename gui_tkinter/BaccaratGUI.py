@@ -99,6 +99,10 @@ class BaccaratGamePage(tk.Frame):
             error = ttk.Label(text=f"{message_body}", bootstyle='light', font=('Candara', 13))
             error.place(relx=0.5, rely=0.8, anchor='n')
             error.after(4000, lambda: error.place_forget())
+        elif "Not" in message_body or "Invalid" in message_body:
+            error = ttk.Label(text=f"{message_body}", bootstyle='light', font=('Candara', 13))
+            error.place(relx=0.5, rely=0.15, anchor='n')
+            error.after(4000, lambda: error.place_forget())
         else:
             self.message_listbox.insert(tk.END, f"{message_body}\n")
 

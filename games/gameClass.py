@@ -43,6 +43,14 @@ class Game:
     def start(self):
         pass
 
+    def update_balance(self, s, balance):
+        client_name = self.players[s].name
+        self.game_room.change_balance(client_name, balance)
+
+    def add_game_history(self, s, game_name, win, earnings, loss):
+        client_name = self.players[s].name
+        self.game_room.add_game_history(client_name, game_name, win, earnings, loss)
+
     def on_low_players_num(self):
         return GameStatus.STOPPED
 

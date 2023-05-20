@@ -13,14 +13,22 @@ if not check_file:
                  ClientName     varchar(50) UNIQUE   NOT NULL,
                  Balance          INT     NOT NULL);''')
 
-    conn.execute('''CREATE TABLE Games
-                 (GameID INT PRIMARY KEY     NOT NULL,
-                 ClientID INT                  NOT NULL,
-                 GameName           varchar(50)    NOT NULL,
-                 DatePlayed            date     NOT NULL,
-                 Win                   bit NOT NULL,
-                 Earnings           INT         NOT NULL,
-                 Loss               INT         NOT NULL);''')
+    conn.execute('''CREATE TABLE Game
+    (
+    GameID INT PRIMARY KEY     NOT NULL,
+    GameName varchar(50)       NOT NULL
+    )
+    ''')
+
+    conn.execute('''CREATE TABLE GamesHistory
+                 (GamesHistoryID INT PRIMARY KEY   NOT NULL,
+                 GameID INT                 NOT NULL,
+                 ClientID INT               NOT NULL,
+                 DatePlayed date            NOT NULL,
+                 Win bit                    NOT NULL,
+                 Earnings INT               NOT NULL,
+                 Loss INT                   NOT NULL
+                 );''')
 
 
 def insert_client(client_name, balance):
@@ -36,19 +44,24 @@ def insert_client(client_name, balance):
     conn.commit()
 
 
-def insert_game(client_name, game_name, win, earnings, loss):
+def insert_game_history(client_name, game_name, win, earnings, loss):
     cursor = conn.execute("SELECT ClientID FROM Clients WHERE ClientName = ?", client_name)
     for row in cursor:
         client_id = row[0]
-    cursor = conn.execute("SELECT MAX(GameID) FROM Games")
+
+    cursor = conn.execute("SELECT GameID FROM Games WHERE GameName = ?", game_name)
+    for row in cursor:
+        game_id = row[0]
+
+    cursor = conn.execute("SELECT MAX(GamesHistoryID) FROM GamesHistory")
     try:
         for row in cursor:
-            game_id = int(row[0]) + 1
+            games_history_id = int(row[0]) + 1
     except TypeError:
-        game_id = 0
+        games_history_id = 0
 
-    conn.execute("INSERT INTO Games (GameID, ClientID, GameName, DatePlayed, Win, Earnings, Loss) \
-          VALUES (?, ?, ?, date(), ?, ?, ?)", (game_id, client_id, game_name, win, earnings, loss))
+    conn.execute("INSERT INTO GamesHistory (GamesHistoryID, GameID, ClientID, DatePlayed, Win, Earnings, Loss) \
+          VALUES (?, ?, ?, date(), ?, ?, ?)", (games_history_id, game_id, client_id, win, earnings, loss))
     conn.commit()
 
 
