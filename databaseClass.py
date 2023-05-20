@@ -6,12 +6,6 @@ class Database:
     DB_NAME = 'casino_database.db'
 
     def __init__(self):
-        # self.data = {
-        #     "sus": [1, 1000],
-        #     "guest": [2, 2000],
-        #     "jack05": [3, 100]
-        # }
-        #self.curr_client_id = 4
         check_file = os.path.isfile('./' + self.DB_NAME)
         self.conn = sqlite3.connect('casino_database.db')
         if not check_file:
