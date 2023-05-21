@@ -168,6 +168,11 @@ class Server:
                 self.transfer_client(found_rooms[0], s)
             elif data[0] == "exit":
                 self.disconnect_client(s)
+            elif data[0] == "stat":
+                data = self.database.get_player_stats(self.connected_clients[s].name)
+                if s not in self.outputs:
+                    self.outputs.append(s)
+                    self.message_queues[s].put((bytes("Stat:" + str(data), "utf-8"), SendDataType.STRING))
             else:
                 raise InvalidResponseException
 
