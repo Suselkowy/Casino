@@ -11,6 +11,7 @@ from RouletteGUI import RouletteGamePage
 from BingoGUI import BingoGamePage
 from BlackjackGUI import BlackjackGamePage
 from BaccaratGUI import BaccaratGamePage
+from StatsGUI import StatPage
 from PIL import Image, ImageTk
 
 # Set up the socket
@@ -49,6 +50,10 @@ class SampleApp(ttk.Window):
             self.frames[page_name] = frame
             self.update_idletasks()
             # frame.grid(row=0, column=0, sticky="nsew")
+
+        self.frames["stat"] = StatPage(parent=self.container, controller=self, width=self.winfo_height(), height=self.winfo_height())
+        self.update_idletasks()
+
         self.show_frame("LoginPage")
 
     def show_frame(self, page_name):
@@ -162,8 +167,16 @@ class ChooseGamePage(tk.Frame):
                 curr_col = 0
                 curr_row += 1
 
+        self.stat_btn = tk.Button(self, text=f"Stat", font=self.fn, command=self.load_stats)
+        self.stat_btn.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
+
+
     def handle_message(self, data):
         pass
+
+    def load_stats(self):
+        self.controller.show_frame("stat")
+        s.send(bytes(f"stat", 'utf-8'))
 
     def callback(self, event):
         clicked_btn = event.widget
