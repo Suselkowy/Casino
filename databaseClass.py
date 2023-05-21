@@ -114,5 +114,45 @@ class Database:
         except Exception as e:
             print(e)
 
+    def get_player_stats(self, player_name):
+        query = '''
+        SELECT g.GameName,COUNT(gh.GamesHistoryID) AS TotalGames, SUM(gh.Win) AS TotalWins, SUM(gh.Earnings) AS TotalEarnings, SUM(gh.Loss) AS TotalLosses
+        FROM Clients AS c
+        JOIN GamesHistory AS gh ON c.ClientID = gh.ClientID
+        JOIN Game AS g ON g.GameID = gh.GameID
+        WHERE c.ClientName = ?
+        GROUP BY g.GameName
+        '''
+
+        try:
+            cursor = self.conn.execute(query, (player_name,))
+            stats = cursor.fetchall()
+            return stats
+        except Exception as e:
+            print(e)
+            return None
+
+
 if  __name__ == "__main__":
     a = Database()
+    print(a.get_player_stats("sus"))
+    # a.create_client("rob")
+    # a.create_client("bob")
+    # game_history = [
+    #     ("bob", "poker", 0, 0, 100),
+    #     ("rob", "blackjack", 1, 1000, 0),
+    #     ("bob", "bingo", 1, 200, 0),
+    #     ("rob", "roulette", 0, 0, 300),
+    #     ("bob", "dice", 1, 300, 0),
+    #     ("rob", "roulette", 0, 0, 200),
+    #     ("bob", "bingo", 1, 100, 0),
+    #     ("rob", "blackjack", 1, 500, 0),
+    #     ("bob", "dice", 0, 0, 75),
+    #     ("rob", "baccarat", 1, 1000, 0)
+    # ]
+    #
+    # for record in game_history:
+    #     a.insert_game_history(*record)
+
+
+
