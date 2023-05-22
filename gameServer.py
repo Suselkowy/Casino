@@ -10,6 +10,7 @@ from helpers import SendDataType
 from helpers import send_data
 import time
 
+
 def start_room(game_room):
     start_new_thread(lambda x: x.start(), (game_room,))
 
@@ -32,7 +33,7 @@ class Server:
         self.inputs = [self.s]
         self.outputs = []
         self.message_queues = {self.s: queue.Queue()}
-        self.game_rooms:[gameRoom.GameRoom] = []
+        self.game_rooms: [gameRoom.GameRoom] = []
 
     def init_socket(self):
         self.s.bind((self.SERVER_IP, self.SERVER_PORT))
@@ -88,7 +89,7 @@ class Server:
                         decoded_response = response.decode()
                         try:
                             self.handle_client_response(decoded_response, s)
-                            #print(f"New response: {decoded_response} from client {self.connected_clients[s].name}")
+                            # print(f"New response: {decoded_response} from client {self.connected_clients[s].name}")
                         except InvalidResponseException:
                             print("Invalid response")
                         except InvalidUserException:
@@ -158,9 +159,8 @@ class Server:
         try:
             if data[0] == "play":
                 found_rooms = gameRoom.search_game_room(self.game_rooms, data[1])
-                print("znalezione pokoje:" ,found_rooms)
+                print("znalezione pokoje:", found_rooms)
                 if not found_rooms:
-
                     new_room = gameRoom.create_game_room(data[1], self)
                     self.game_rooms.append(new_room)
                     found_rooms = [new_room]

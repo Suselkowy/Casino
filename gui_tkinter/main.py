@@ -12,6 +12,7 @@ from BingoGUI import BingoGamePage
 from BlackjackGUI import BlackjackGamePage
 from BaccaratGUI import BaccaratGamePage
 from StatsGUI import StatPage
+from PokerGUI import PokerGamePage
 from PIL import Image, ImageTk
 
 # Set up the socket
@@ -42,7 +43,7 @@ class SampleApp(ttk.Window):
 
         for F in (
                 LoginPage, ChooseGamePage, BaccaratGamePage, DiceGamePage, RouletteGamePage, BingoGamePage,
-                BlackjackGamePage):
+                BlackjackGamePage, PokerGamePage):
             page_name = F.__name__
             frame = F(parent=self.container, controller=self, width=self.winfo_height(), height=self.winfo_height())
             if page_name == "GamePage":
