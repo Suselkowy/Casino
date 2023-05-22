@@ -75,6 +75,7 @@ class Bingo(Game):
                     else:
                         self.bets[s] = bet_amount
                         self.players[s].balance -= bet_amount
+                        self.update_balance(s, -bet_amount)
                         self.pot += bet_amount
                         self.message_queues[s].put(
                             (bytes(f"{bet_amount} bet placed, wait for other players\n", "utf-8"), SendDataType.STRING))
@@ -142,12 +143,16 @@ class Bingo(Game):
         self.players[s].balance += self.pot
         self.message_queues[s].put((bytes(f"You won {self.pot}!", "utf-8"), SendDataType.STRING))
         self.output.append(s)
+        self.update_balance(s, self.pot)
+        self.add_game_history(s, "bingo", 1, self.pot, 0)
         self.end_game()
 
     def end_game(self):
         for client_key in self.players.keys():
             self.message_queues[client_key].put((bytes("Game over!", "utf-8"), SendDataType.STRING))
             self.output.append(client_key)
+            if client_key != self.winner:
+                self.add_game_history(client_key, "bingo", 0, 0, self.bets[client_key])
         self.state = GameState.GAME_OVER
 
     def reset(self):

@@ -63,6 +63,7 @@ class Blackjack(Game):
                         self.bets[s] = bet_amount
                         self.players[s].balance -= bet_amount
                         self.pot += bet_amount
+                        self.update_balance(s, -bet_amount)
                         self.message_queues[s].put(
                             (bytes(f"{bet_amount} bet placed, game starts!\n", "utf-8"), SendDataType.STRING))
                         self.output.append(s)
@@ -136,11 +137,14 @@ class Blackjack(Game):
         self.players[self.player_key].balance += self.pot
         self.message_queues[self.player_key].put((bytes(f"You won!\n", "utf-8"), SendDataType.STRING))
         self.output.append(self.player_key)
+        self.update_balance(self.player_key, self.pot)
+        self.add_game_history(self.player_key, "blackjack", 1, self.pot, 0)
         self.prepare_next_round()
 
     def handle_lost(self):
         self.message_queues[self.player_key].put((bytes(f"You lost!\n", "utf-8"), SendDataType.STRING))
         self.output.append(self.player_key)
+        self.add_game_history(self.player_key, "blackjack", 0, 0, self.bets[self.player_key])
         self.prepare_next_round()
 
     def prepare_next_round(self):
