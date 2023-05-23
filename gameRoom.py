@@ -135,7 +135,8 @@ class GameRoom:
                 if self.game.status == GameStatus.UPDATE:
                     self.game.time_of_last_move = time.time()
                     self.game.status = GameStatus.NO_CHANGE
-
+            else:
+                time.sleep(1)
 
 
 def search_game_room(game_rooms: [GameRoom], name: str):
