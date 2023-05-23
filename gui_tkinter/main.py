@@ -36,7 +36,7 @@ class SampleApp(ttk.Window):
         self.s = s
         self.curr_frame = None
 
-        self.width, self.height = 600, 600
+        self.width, self.height = 900, 600
         self.geometry(f"{self.width}x{self.height}")
         self.minsize(self.width, self.height)
         self.frames = {}

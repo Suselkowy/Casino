@@ -132,13 +132,11 @@ class DiceGamePage(tk.Frame):
             self.dice_1['image'] = self.dice_imgs[int(str_tuple_1[1]) - 1]
             self.dice_2['image'] = self.dice_imgs[int(str_tuple_2[0]) - 1]
 
-
         if "waiting for next roll!" in message_body:
             self.isRollTime = 1
             self.roll_btn['bg'] = 'green'
         if "Rolled" not in message_body:
             self.show_message(message_body)
-
 
     def back(self):
         self.s.send(bytes("back", 'utf-8'))
@@ -146,6 +144,6 @@ class DiceGamePage(tk.Frame):
         self.clear()
 
     def clear(self):
-        self.messages_output.delete('1.0', tk.END)
+        self.messages_output.delete(0, tk.END)
         self.bet_entry.delete(0, tk.END)
         self.roll_btn['bg'] = "#375A7F"
