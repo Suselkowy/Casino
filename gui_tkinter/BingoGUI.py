@@ -21,8 +21,8 @@ class BingoGamePage(tk.Frame):
         self.bet_entry = tk.Entry(self)
         self.bet_entry.pack()
 
-        self.play_button = tk.Button(self, text="Play", command=self.play)
-        self.play_button.pack()
+        # self.play_button = tk.Button(self, text="Play", command=self.play)
+        # self.play_button.pack()
 
         self.bet_button = tk.Button(self, text="Place Bet", command=self.place_bet)
         self.bet_button.pack()
@@ -56,8 +56,8 @@ class BingoGamePage(tk.Frame):
         position = self.bet_entry.get()
         self.s.send(bytes(position, "utf-8"))
 
-    def play(self):
-        self.s.send(bytes("play bingo", "utf-8"))
+    # def play(self):
+    #     self.s.send(bytes("play bingo", "utf-8"))
 
     def update_board(self, board):
         self.board_text.delete('1.0', tk.END)

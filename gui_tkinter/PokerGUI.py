@@ -102,3 +102,4 @@ class PokerGamePage(tk.Frame):
                     self.update_hand(msg[6:])
                 else:
                     self.update_cmd(msg)
+

@@ -13,6 +13,7 @@ from BlackjackGUI import BlackjackGamePage
 from BaccaratGUI import BaccaratGamePage
 from PokerGUI import PokerGamePage
 from StatsGUI import StatPage
+from PokerGUI import PokerGamePage
 from PIL import Image, ImageTk
 
 # Set up the socket
