@@ -40,6 +40,8 @@ class SampleApp(ttk.Window):
         self.minsize(self.width, self.height)
         self.frames = {}
 
+        self.protocol("WM_DELETE_WINDOW", self.on_exit)
+
         for F in (
                 LoginPage, ChooseGamePage, BaccaratGamePage, DiceGamePage, RouletteGamePage, BingoGamePage,
                 BlackjackGamePage):
@@ -55,6 +57,11 @@ class SampleApp(ttk.Window):
 
         self.show_frame("LoginPage")
 
+    def on_exit(self):
+        global running
+        running = False
+        self.destroy()
+
     def show_frame(self, page_name):
         if self.curr_frame is not None:
             self.curr_frame.grid_forget()
@@ -67,7 +74,6 @@ class SampleApp(ttk.Window):
         pass
 
     def receive_messages(self):
-        print("start reciver")
         global running
         while running:
             try:
