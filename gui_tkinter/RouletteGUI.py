@@ -22,7 +22,7 @@ class RouletteGamePage(tk.Frame):
         self.middle_frame = tk.Frame(self)
         self.middle_frame.place(relx=0.5, rely=0.55, relwidth=0.8, relheight=0.8, anchor='center')
 
-        roulette_outcome = tk.Label(self.middle_frame, font=self.ft, fg="#333333", justify='center', text="outcome", width=9, height=4)
+        roulette_outcome = tk.Label(self.middle_frame, font=self.ft, fg="#333333", justify='center', text="", width=9, height=4)
         self.roulette_outcome = roulette_outcome
         self.roulette_outcome.place(relx=0.5, rely=0.3, anchor='center')
 

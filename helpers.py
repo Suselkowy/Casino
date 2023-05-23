@@ -1,15 +1,18 @@
 import pickle
+import socket
 from enum import Enum
 
 STRING_BUFFER_SIZE = 1024
 PICKLE_BUFFER_SIZE = 2048
+
 
 class SendDataType(Enum):
     STRING = 0
     PICKLE = 1
     NONE = 2
 
-def send_data(data, conn ,type):
+
+def send_data(data, conn, type):
     if type == SendDataType.STRING:
         msg_len = len(data)
         header_2 = msg_len.to_bytes(4, byteorder='big')
@@ -19,11 +22,15 @@ def send_data(data, conn ,type):
         conn.send(b"type pickle ")
         conn.sendall(pickle.dump(data))
 
+
 def receive_data(conn):
     #  TODO: fix for big networks
-    # conn.settimeout(5.0)
-    data = conn.recv(16)
-    # conn.settimeout(None)
+    try:
+        conn.settimeout(2.0)
+        data = conn.recv(16)
+        conn.settimeout(None)
+    except socket.timeout:
+        return None
 
     msg_len = int.from_bytes(data[12:16], byteorder="big")
     decoded = data[:11].decode().split(" ")
@@ -52,5 +59,3 @@ def receive_data(conn):
     mess = b"".join(chunks)
 
     return data_type, mess
-
-
