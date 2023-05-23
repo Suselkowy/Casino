@@ -38,3 +38,11 @@ class ShooterDpassBet(Exception):
 
     def __repr__(self):
         return self.message
+
+# Poker errors
+class NotEnoughRaiseError(Exception):
+    def __init__(self):
+        self.message = "Raise must be higher than previous raise"
+
+    def __repr__(self):
+        return self.message

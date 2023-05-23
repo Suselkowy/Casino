@@ -11,6 +11,7 @@ from RouletteGUI import RouletteGamePage
 from BingoGUI import BingoGamePage
 from BlackjackGUI import BlackjackGamePage
 from BaccaratGUI import BaccaratGamePage
+from PokerGUI import PokerGamePage
 from StatsGUI import StatPage
 from PIL import Image, ImageTk
 
@@ -44,7 +45,7 @@ class SampleApp(ttk.Window):
 
         for F in (
                 LoginPage, ChooseGamePage, BaccaratGamePage, DiceGamePage, RouletteGamePage, BingoGamePage,
-                BlackjackGamePage):
+                BlackjackGamePage, PokerGamePage):
             page_name = F.__name__
             frame = F(parent=self.container, controller=self, width=self.winfo_height(), height=self.winfo_height())
             if page_name == "GamePage":

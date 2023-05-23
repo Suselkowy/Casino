@@ -125,7 +125,8 @@ class DiceGamePage(tk.Frame):
         elif message_body == "Bets ended, time for shooter to roll!":
             # self.show_message("Bets ended, time for shooter to roll!")
             self.isRollTime = 1
-            self.roll_btn['bg'] = 'green'
+            if self.isMeShooter:
+                self.roll_btn['bg'] = 'green'
         elif message_split[0] == "Rolled":
             str_tuple_1 = message_split[1]
             str_tuple_2 = message_split[2]
