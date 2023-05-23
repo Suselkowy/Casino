@@ -46,6 +46,7 @@ class Roulette(Game):
                         raise InvalidBet
 
                     self.players[s].balance -= amount
+                    self.update_balance(s, -amount)
                     self.bets[s][info[1]] += amount
 
                     self.message_queues[s].put((b"Bet placed", SendDataType.STRING))
@@ -89,11 +90,28 @@ class Roulette(Game):
                     if self.bets.get(client_key) is not None:
                         client_score = self.calculate_winning(self.bets[client_key], rolled)
                         self.players[client_key].balance += client_score
+                        self.update_balance(client_key, client_score)
 
+                        won = 1
                         message = f"You won: {client_score}"
 
                         if client_score == 0:
                             message = "You lost"
+                            won = 0
+                        winning = client_score
+                        loss = 0
+                        if rolled % 2 == 0:
+                            loss = self.bets[client_key]['green'] + self.bets[client_key]['black']
+                        elif rolled == 0:
+                            loss = self.bets[client_key]['red'] + self.bets[client_key]['black']
+                        else:
+                            loss = self.bets[client_key]['red'] + self.bets[client_key]['green']
+                        try:
+                            if loss > winning:
+                                won = 0
+                            self.add_game_history(client_key, "roulette", won, winning, loss)
+                        except Exception as e:
+                            print(e)
 
                         self.output.append(client_key)
                         self.message_queues[client_key].put(

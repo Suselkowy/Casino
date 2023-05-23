@@ -99,6 +99,7 @@ class Dice(Game):
 
                     self.bets[s][response_split[0]] += amount
                     self.players[s].balance -= amount
+                    self.update_balance(s, -amount)
 
                     self.send_message("Bet placed", SendDataType.STRING, s)
 
@@ -126,9 +127,30 @@ class Dice(Game):
                 client_score = calculate_winning(self.bets[client_key], winning_bet)
 
                 self.players[client_key].balance += client_score
+                self.update_balance(client_key, client_score)
 
                 self.send_message(f"You won: {client_score}" if client_score > 0 else "You lose", SendDataType.STRING,
                                   client_key)
+
+                won = 0
+                if client_score > 0:
+                    won = 1
+
+                winnings = 0
+                loss = 0
+
+                if winning_bet == DiceWinTypes.DPASS:
+                    loss = self.bets[client_key]['pass']
+                    winnings = self.bets[client_key]['dpass']
+                elif winning_bet == DiceWinTypes.PASS:
+                    loss = self.bets[client_key]['dpass']
+                    winnings = self.bets[client_key]['pass']
+                elif winning_bet == DiceWinTypes.DRAW:
+                    loss = self.bets[client_key]['pass']
+                    winnings = 0
+
+                self.add_game_history(client_key, "dice", won, winnings, loss)
+
         self.new_round()
 
     def new_round(self):
