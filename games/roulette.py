@@ -46,7 +46,7 @@ class Roulette(Game):
                         raise InvalidBet
 
                     self.players[s].balance -= amount
-                    self.update_balance(s, amount)
+                    self.update_balance(s, -amount)
                     self.bets[s][info[1]] += amount
 
                     self.message_queues[s].put((b"Bet placed", SendDataType.STRING))

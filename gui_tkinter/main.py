@@ -49,7 +49,6 @@ class SampleApp(ttk.Window):
                 self.handle_function = self.empty_handler
             self.frames[page_name] = frame
             self.update_idletasks()
-            # frame.grid(row=0, column=0, sticky="nsew")
 
         self.frames["stat"] = StatPage(parent=self.container, controller=self, width=self.winfo_height(), height=self.winfo_height())
         self.update_idletasks()
@@ -63,7 +62,6 @@ class SampleApp(ttk.Window):
         frame.grid(row=0, column=0, sticky="nsew")
         self.curr_frame = frame
         self.handle_function = frame.handle_message
-        # frame.tkraise()
 
     def empty_handler(self, message):
         pass
@@ -191,3 +189,4 @@ class ChooseGamePage(tk.Frame):
 if __name__ == "__main__":
     app = SampleApp()
     app.mainloop()
+
