@@ -4,7 +4,6 @@ from games.gameClass import Game, GameStatus
 from helpers import SendDataType
 import time
 from errorDefinitions import InvalidBet
-from _thread import *
 
 
 class Roulette(Game):
@@ -15,7 +14,7 @@ class Roulette(Game):
         super().__init__()
         self.bets = dict()
         self.isBetTime = 0
-        self.state = 0
+        self.state = 1
         random.seed(time.time())
 
     def roll(self):
