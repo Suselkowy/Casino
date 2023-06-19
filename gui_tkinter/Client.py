@@ -17,6 +17,7 @@ PORT = 65432
 running = True
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+
 class SampleApp(ttk.Window):
 
     def __init__(self, *args, **kwargs):
@@ -26,7 +27,6 @@ class SampleApp(ttk.Window):
         self.container.pack(side="top", fill="both", expand=True)
         self.container.grid_rowconfigure(0, weight=1)
         self.container.grid_columnconfigure(0, weight=1)
-        # self.resizable(0, 0)
         self.s = s
         self.curr_frame = None
 
@@ -47,7 +47,8 @@ class SampleApp(ttk.Window):
             self.frames[page_name] = frame
             self.update_idletasks()
 
-        self.frames["stat"] = StatPage(parent=self.container, controller=self, width=self.winfo_height(), height=self.winfo_height())
+        self.frames["stat"] = StatPage(parent=self.container, controller=self, width=self.winfo_height(),
+                                       height=self.winfo_height())
         self.update_idletasks()
 
         self.show_frame("LoginPage")
@@ -169,7 +170,6 @@ class ChooseGamePage(tk.Frame):
         self.stat_btn = tk.Button(self, text=f"Stat", font=self.fn, command=self.load_stats)
         self.stat_btn.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
 
-
     def handle_message(self, data):
         pass
 
@@ -190,4 +190,3 @@ class ChooseGamePage(tk.Frame):
 if __name__ == "__main__":
     app = SampleApp()
     app.mainloop()
-
