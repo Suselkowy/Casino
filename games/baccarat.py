@@ -18,6 +18,7 @@ class Outcome(Enum):
     def next(self):
         return Outcome((self.value + 1) % 3)
 
+
 class Baccarat(Game):
     MAX_PLAYERS = 1
     MIN_PLAYERS = 1
@@ -64,11 +65,13 @@ class Baccarat(Game):
                 f"Outcome:-{self.bets[outcome.next().name] + self.bets[outcome.next().next().name]}", "utf-8"),
                                                   SendDataType.STRING))
             self.output.append(self.player)
-            self.add_game_history(self.player, "baccarat", 0, 0, self.bets[outcome.next().name] + self.bets[outcome.next().next().name])
+            self.add_game_history(self.player, "baccarat", 0, 0,
+                                  self.bets[outcome.next().name] + self.bets[outcome.next().next().name])
         else:
             self.players[self.player].balance += self.bets[outcome.name] * 2
             self.update_balance(self.player, self.bets[outcome.name] * 2)
-            self.message_queues[self.player].put((bytes(f"Outcome:+{self.bets[outcome.name]}", "utf-8"), SendDataType.STRING))
+            self.message_queues[self.player].put(
+                (bytes(f"Outcome:+{self.bets[outcome.name]}", "utf-8"), SendDataType.STRING))
             self.output.append(self.player)
             self.add_game_history(self.player, "baccarat", 1, self.bets[outcome.name], 0)
 
@@ -182,4 +185,3 @@ class Baccarat(Game):
         self.table = [[], []]
         for key in self.bets:
             self.bets[key] = 0
-

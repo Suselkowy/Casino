@@ -1,8 +1,8 @@
 import random as rn
 from enum import Enum
 from games.gameClass import Game, GameStatus
-from helpers import SendDataType
 import time
+
 
 def check(board):
     for i in range(5):
@@ -60,7 +60,6 @@ class Bingo(Game):
         self.numbers = [i for i in range(1, 76)]
         rn.shuffle(self.numbers)
 
-
     def handle_response(self, response, s):
         super(Bingo, self).handle_response(response, s)
         if self.status != GameStatus.STOPPED and self.state != GameState.GAME_OVER:
@@ -74,7 +73,7 @@ class Bingo(Game):
                         self.players[s].balance -= bet_amount
                         self.update_balance(s, -bet_amount)
                         self.pot += bet_amount
-                        self.send_str(f"{bet_amount} bet placed, wait for other players\n", s) #new
+                        self.send_str(f"{bet_amount} bet placed, wait for other players\n", s)
                 except ValueError:
                     self.send_str("Invalid bet!\n", s)
             elif response == "bingo" and self.winner is None:
@@ -105,9 +104,8 @@ class Bingo(Game):
             self.current_nb = self.numbers[self.current_nb_idx]
             self.current_nb_idx += 1
             for client_key in self.players.keys():
-                message = board_to_str(self.boards[client_key])
-                message += f"Current number: {self.current_nb}\n"
-                self.send_str(message, client_key)
+                self.send_str(board_to_str(self.boards[client_key]), client_key)
+                self.send_str(f"Current number: {self.current_nb}\n", client_key)
             self.last_update = time.time()
             self.initialized = True
         elif self.initialized and self.status != GameStatus.STOPPED and time.time() - self.last_update >= self.max_time:
@@ -119,10 +117,7 @@ class Bingo(Game):
                 self.current_nb = self.numbers[self.current_nb_idx]
                 self.current_nb_idx += 1
                 for client_key in self.players.keys():
-                    self.current_nb = self.numbers[self.current_nb_idx]
-                    self.current_nb_idx += 1
-                    message = f"Current number: {self.current_nb}\n"
-                    self.send_str(message, client_key)
+                    self.send_str(f"Current number: {self.current_nb}\n", client_key)
                 self.last_update = time.time()
 
     def handle_win(self, s):
@@ -155,7 +150,6 @@ class Bingo(Game):
 
     def start(self):
         self.status = GameStatus.UPDATE
-
-        greeting_message = f"Welcome to the Bingo game!\nPlace your bet:\n"
+        greeting_message = "Welcome to the Bingo game!\n Place your bet:\n"
         for client_key in self.players.keys():
             self.send_str(greeting_message, client_key)
