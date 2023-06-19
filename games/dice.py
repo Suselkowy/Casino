@@ -4,8 +4,6 @@ from games.gameClass import Game, GameStatus
 from helpers import SendDataType
 from errorDefinitions import ShooterDpassBet, InvalidBet
 import time
-from rules import dice_rules, dice_commands
-from _thread import *
 
 
 class DiceWinTypes(Enum):
@@ -61,9 +59,15 @@ class Dice(Game):
     def handle_response(self, response, s):
         if self.status != GameStatus.STOPPED:
             if response == "commands":
-                self.send_message(dice_commands, SendDataType.STRING, s)
-            elif response == "gmrules":
-                self.send_message(dice_rules, SendDataType.STRING, s)
+                self.send_message("""Available commands:
+    -Betting:
+        [pass|dpass] <amount>
+    -Rolling
+        roll
+    -Game rules
+        gmrules
+    -Quit
+        back""", SendDataType.STRING, s)
             elif response == "roll":
                 if self.shooter == s and self.state not in (-1, 0):
 
@@ -111,7 +115,7 @@ class Dice(Game):
             self.message_sent = 0
             self.isBetTime = 1
             self.isRollTime = 0
-        if state in (1,2):
+        if state in (1, 2):
             self.isRollTime = 1
             self.isBetTime = 0
 
@@ -259,7 +263,8 @@ class Dice(Game):
                 for key in ("pass", "dpass"):
                     self.players[client_key].balance += self.bets[client_key][key]
 
-                self.send_message(f"Not enough players, all players will be kicked from server", SendDataType.STRING, client_key)
+                self.send_message(f"Not enough players, all players will be kicked from server", SendDataType.STRING,
+                                  client_key)
 
         for client_key in self.players.keys():
             self.game_room.untransfer_player(client_key)
