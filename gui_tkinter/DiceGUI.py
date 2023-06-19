@@ -29,83 +29,99 @@ class DiceGamePage(tk.Frame):
         self.dice_2 = self.gui_elements["dice_2"]
 
     def create_back_button(self):
-        back_btn = tk.Button(self, bg="#375A7F", font=self.ft, fg="#FFFFFF", justify='center', text="Back",
-                             command=self.back)
-        back_btn.place(x=10, y=10, width=70)
-        self.gui_elements["back_btn"] = back_btn
-        return back_btn
+        self.gui_elements["back_button"] = tk.Button(
+            self,
+            text="Back",
+            command=self.back,
+            bg="#375A7F",
+            font=self.ft,
+            fg="#FFFFFF",
+            justify="center",
+            width=10,
+        )
+        self.gui_elements["back_button"].place(x=10, y=10, width=70)
+        return self.gui_elements["back_button"]
 
     def create_roll_frame(self):
-        roll_frame = tk.Frame(self)
-        roll_frame.place(relx=0, rely=0.5, relwidth=0.5, relheight=0.8, anchor='w')
-        self.gui_elements["roll_frame"] = roll_frame
-        fake_label_top_roll = tk.Label(roll_frame)
-        fake_label_top_roll.pack(expand=True)
-        self.gui_elements["fake_label_top_roll"] = fake_label_top_roll
-        dice_frame = self.create_dice_frame(roll_frame)
-        roll_btn = tk.Button(roll_frame, bg="#375A7F", font=self.ft, fg="#FFFFFF", justify='center',
-                             text="Roll",
-                             command=self.roll, width=10)
-        roll_btn.pack(pady=10)
-        self.gui_elements["roll_btn"] = roll_btn
-        fake_label_bottom_roll = tk.Label(roll_frame)
-        fake_label_bottom_roll.pack(expand=True)
-        self.gui_elements["fake_label_bottom_roll"] = fake_label_bottom_roll
+        self.gui_elements["roll_frame"] = roll_frame = tk.Frame(self)
+        self.gui_elements["roll_frame"].place(relx=0, rely=0.5, relwidth=0.5, relheight=0.8, anchor='w')
+
+        self.gui_elements["fake_label_top_roll"] = tk.Label(roll_frame)
+        self.gui_elements["fake_label_top_roll"].pack(expand=True)
+
+        self.create_dice_frame()
+        self.gui_elements["roll_btn"] = tk.Button(
+            roll_frame,
+            text="Roll",
+            command=self.roll,
+            bg="#375A7F",
+            font=self.ft,
+            fg="#FFFFFF",
+            justify='center',
+            width=10
+        )
+        self.gui_elements["roll_btn"].pack(pady=10)
+
+        self.gui_elements["fake_label_bottom_roll"] = tk.Label(roll_frame)
+        self.gui_elements["fake_label_bottom_roll"].pack(expand=True)
+
         return roll_frame
 
-    def create_dice_frame(self, parent):
-        dice_frame = tk.Frame(parent)
-        dice_1 = tk.Label(dice_frame, image=self.dice_imgs[0], fg="#FFFFFF", justify='center')
-        dice_1.pack(side='left', padx=10)
-        self.gui_elements["dice_1"] = dice_1
+    def create_dice_frame(self):
+        self.gui_elements["dice_frame"] = dice_frame = tk.Frame(self.gui_elements["roll_frame"])
+        self.gui_elements["dice_frame"].pack(pady=20)
 
-        dice_2 = tk.Label(dice_frame, image=self.dice_imgs[0], fg="#FFFFFF", justify='center')
-        dice_2.pack(side='left', padx=10)
-        self.gui_elements["dice_2"] = dice_2
-        dice_frame.pack(pady=20)
-        self.gui_elements["dice_frame"] = dice_frame
+        self.gui_elements["dice_1"] = tk.Label(dice_frame, image=self.dice_imgs[0], fg="#FFFFFF", justify='center')
+        self.gui_elements["dice_1"].pack(side='left', padx=10)
+
+        self.gui_elements["dice_2"] = tk.Label(dice_frame, image=self.dice_imgs[0], fg="#FFFFFF", justify='center')
+        self.gui_elements["dice_2"].pack(side='left', padx=10)
+
         return dice_frame
 
     def create_bet_frame(self):
-        bet_frame = tk.Frame(self)
-        bet_frame.place(relx=0.5, y=7, relwidth=0.5, relheight=1, anchor='nw')
-        self.gui_elements["bet_frame"] = bet_frame
-        fake_label_top = tk.Label(bet_frame)
-        fake_label_top.pack(expand=True)
-        self.gui_elements["fake_label_top"] = fake_label_top
-        bet_label = tk.Label(bet_frame, font=self.ft, fg="#FFFFFF", justify='center', text="Enter bet amount")
-        bet_label.pack(pady=20)
-        self.gui_elements["bet_label"] = bet_label
-        bet_entry = ttk.Entry(bet_frame, font=self.ft, textvariable=self.bet_entry)
-        bet_entry.pack(pady=20)
-        self.gui_elements["bet_entry"] = bet_entry
-        button_frame = self.create_button_frame(bet_frame)
+        self.gui_elements["bet_frame"] = bet_frame = tk.Frame(self)
+        self.gui_elements["bet_frame"].place(relx=0.5, y=7, relwidth=0.5, relheight=1, anchor='nw')
 
-        fake_label_bottom = tk.Label(bet_frame)
-        fake_label_bottom.pack(expand=True)
-        self.gui_elements["fake_label_bottom"] = fake_label_bottom
+        self.gui_elements["fake_label_top"] = tk.Label(bet_frame)
+        self.gui_elements["fake_label_top"].pack(expand=True)
+
+        self.gui_elements["bet_label"] = tk.Label(bet_frame, font=self.ft, fg="#FFFFFF", justify='center',
+                                                  text="Enter bet amount")
+        self.gui_elements["bet_label"].pack(pady=20)
+
+        self.gui_elements["bet_entry"] = ttk.Entry(bet_frame, font=self.ft, textvariable=self.bet_entry)
+        self.gui_elements["bet_entry"].pack(pady=20)
+
+        self.create_button_frame()
+
+        self.gui_elements["fake_label_bottom"] = tk.Label(bet_frame)
+        self.gui_elements["fake_label_bottom"].pack(expand=True)
+
         return bet_frame
 
-    def create_button_frame(self, parent):
-        btn_frame = tk.Frame(parent)
-        btn_frame.pack(pady=30)
-        self.gui_elements["btn_frame"] = btn_frame
-        pass_btn = tk.Button(btn_frame, background="#375A7F", font=self.ft, fg="#FFFFFF", justify='center',
-                             text="pass",
-                             command=self.pass_handler, width=10)
-        pass_btn.pack(side='left', expand=True, padx=20)
-        self.gui_elements["pass_btn"] = pass_btn
-        dpass_btn = tk.Button(btn_frame, background="#375A7F", font=self.ft, fg="#FFFFFF", justify='center',
-                              text="dpass", command=self.dpass_handler, width=10)
-        dpass_btn.pack(side='left', expand=True, padx=20)
-        self.gui_elements["dpass_btn"] = dpass_btn
+    def create_button_frame(self):
+        self.gui_elements["btn_frame"] = btn_frame = tk.Frame(self.gui_elements["bet_frame"])
+        self.gui_elements["btn_frame"].pack(pady=30)
+
+        self.gui_elements["pass_btn"] = tk.Button(btn_frame, background="#375A7F", font=self.ft, fg="#FFFFFF",
+                                                  justify='center',
+                                                  text="pass",
+                                                  command=self.pass_handler, width=10)
+        self.gui_elements["pass_btn"].pack(side='left', expand=True, padx=20)
+
+        self.gui_elements["dpass_btn"] = tk.Button(btn_frame, background="#375A7F", font=self.ft, fg="#FFFFFF",
+                                                   justify='center',
+                                                   text="dpass", command=self.dpass_handler, width=10)
+        self.gui_elements["dpass_btn"].pack(side='left', expand=True, padx=20)
+
         return btn_frame
 
     def create_messages_output(self):
-        messages_output = tk.Listbox(self, borderwidth='1px', font=self.ft, fg="#FFFFFF", justify='center',
-                                     height=5, bg="#000000")
-        messages_output.place(relx=0.5, y=10, relwidth=0.7, anchor='n')
-        self.gui_elements["messages_output"] = messages_output
+        self.gui_elements["messages_output"] = messages_output = tk.Listbox(self, borderwidth='1px', font=self.ft,
+                                                                            fg="#FFFFFF", justify='center',
+                                                                            height=5, bg="#000000")
+        self.gui_elements["messages_output"].place(relx=0.5, y=10, relwidth=0.7, anchor='n')
         return messages_output
 
     def show_message(self, message):
