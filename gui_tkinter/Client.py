@@ -1,28 +1,21 @@
 import socket
 import tkinter as tk
 import ttkbootstrap as ttk
-from tkinter import messagebox, scrolledtext, TOP, NW
-from helpers import receive_data, SendDataType
+from helpers import receive_data
 import threading
 from gameRoom import GAMES
-import tkinter.font as font
 from DiceGUI import DiceGamePage
 from RouletteGUI import RouletteGamePage
 from BingoGUI import BingoGamePage
 from BlackjackGUI import BlackjackGamePage
 from BaccaratGUI import BaccaratGamePage
-from PokerGUI import PokerGamePage
 from StatsGUI import StatPage
 from PokerGUI import PokerGamePage
-from PIL import Image, ImageTk
 
-# Set up the socket
-HOST = "127.0.0.1"  # The server's hostname or IP address
-PORT = 65432  # The port used by the server
+HOST = "127.0.0.1"
+PORT = 65432
 running = True
-
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
 
 class SampleApp(ttk.Window):
 
