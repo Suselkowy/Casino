@@ -166,6 +166,7 @@ class Poker(Game):
             self.bets[player_key] += bet_amount
             self.players[player_key].balance -= bet_amount
             self.pot += bet_amount
+            self.update_balance(player_key, -bet_amount)
             self.send_str(f"{bet_amount} bet placed, game starts!\n", player_key)
             return True
 
@@ -317,14 +318,17 @@ class Poker(Game):
 
     def handle_win(self, player_key):
         self.players[player_key].balance += self.pot
+        self.update_balance(player_key, self.pot)
+        self.add_game_history(player_key, "poker", 1, self.pot, 0)
         self.send_str(f"You won!\n", player_key)
 
     def handle_lost(self, player_key):
+        self.add_game_history(player_key, "poker", 0, 0, self.bets[player_key])
         self.send_str(f"You lost!\n", player_key)
 
     def prepare_next_round(self):
         self.bets = {}
-        self.deck = Deck()
+        self.deck = Deck(CardPoker, 6)
         self.state = GameState.INITIAL_BET
         self.pot = 0
         self.hands = {}
