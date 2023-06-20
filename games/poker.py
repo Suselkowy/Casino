@@ -6,7 +6,7 @@ from games.gameClass import Game, GameStatus
 from helpers import SendDataType
 import time
 from collections import Counter
-from cardClass import Deck, CardPoker
+from games.cardClass import Deck, CardPoker
 
 
 def suit_to_value(suit):
