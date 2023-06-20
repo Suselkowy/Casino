@@ -134,12 +134,12 @@ class DiceGamePage(tk.Frame):
     def dpass_handler(self):
         if self.bet_entry.get() is not None and self.bet_entry.get().isnumeric() and self.isBetTime:
             self.s.send(bytes(f"dpass {self.bet_entry.get()}", 'utf-8'))
-        self.bet_entry = ""
+        self.bet_entry.set("")
 
     def pass_handler(self):
         if self.bet_entry.get() is not None and self.bet_entry.get().isnumeric() and self.isBetTime:
             self.s.send(bytes(f"pass {self.bet_entry.get()}", 'utf-8'))
-        self.bet_entry = ""
+        self.bet_entry.set("")
 
     def roll(self):
         if self.isRollTime:
@@ -157,6 +157,7 @@ class DiceGamePage(tk.Frame):
             self.isBetTime = 1
         elif message_body == "You are a shooter":
             self.isMeShooter = 1
+            print("shooter")
         elif message_split[0] == "Disconnected":
             self.controller.show_frame('ChooseGamePage')
         elif message_body == "Bets ended, time for shooter to roll!":
@@ -170,9 +171,12 @@ class DiceGamePage(tk.Frame):
             self.dice_2['image'] = self.dice_imgs[int(str_tuple_2[0]) - 1]
         if "waiting for next roll!" in message_body:
             self.isRollTime = 1
-            self.roll_btn['bg'] = 'green'
+            if self.isMeShooter:
+                self.roll_btn['bg'] = 'green'
         if "Rolled" not in message_body:
             self.show_message(message_body)
+        if "wins" in message_body:
+            self.isMeShooter = 0
 
     def back(self):
         self.s.send(bytes("back", 'utf-8'))
@@ -181,5 +185,5 @@ class DiceGamePage(tk.Frame):
 
     def clear(self):
         self.messages_output.delete(0, tk.END)
-        self.bet_entry = ""
+        self.bet_entry.set("")
         self.roll_btn['bg'] = "#375A7F"
