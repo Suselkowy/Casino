@@ -140,7 +140,6 @@ class Server:
             test_var = call[0](*call[1])
             print(test_var)
 
-
     def disconnect_client(self, s):
         if s in self.inputs:
             self.inputs.remove(s)

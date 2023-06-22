@@ -1,6 +1,6 @@
 from enum import Enum
 import socket
-from gameServer import Client
+from clientClass import Client
 from helpers import SendDataType
 import time
 

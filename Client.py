@@ -4,13 +4,13 @@ import ttkbootstrap as ttk
 from helpers import receive_data
 import threading
 from gameRoom import GAMES
-from DiceGUI import DiceGamePage
-from RouletteGUI import RouletteGamePage
-from BingoGUI import BingoGamePage
-from BlackjackGUI import BlackjackGamePage
-from BaccaratGUI import BaccaratGamePage
-from StatsGUI import StatPage
-from PokerGUI import PokerGamePage
+from gui.DiceGUI import DiceGamePage
+from gui.RouletteGUI import RouletteGamePage
+from gui.BingoGUI import BingoGamePage
+from gui.BlackjackGUI import BlackjackGamePage
+from gui.BaccaratGUI import BaccaratGamePage
+from gui.StatsGUI import StatPage
+from gui.PokerGUI import PokerGamePage
 
 HOST = "127.0.0.1"
 PORT = 65432

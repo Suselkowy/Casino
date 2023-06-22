@@ -1,4 +1,3 @@
-import random
 from enum import Enum
 from errorDefinitions import InvalidResponseException, InvalidBet
 from games.gameClass import Game, GameStatus

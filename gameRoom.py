@@ -4,10 +4,9 @@ import copy
 GAMES = ["baccarat", "roulette", "dice", "bingo", "blackjack", "poker"]
 import errorDefinitions
 import socket
-from gameServer import Client
+from clientClass import Client
 import select
 import queue
-from enum import Enum
 from helpers import send_data, SendDataType
 
 from games.gameClass import Game
