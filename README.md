@@ -9,5 +9,5 @@ python Server.py
 ```
 to start client:
 ```
-python client.py
+python Client.py
 ```
